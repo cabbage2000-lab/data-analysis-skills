@@ -10,7 +10,16 @@ Version numbers align with the requirements document (`requirements/data-analysi
 - **Finance / quant template `finance.md`** (#2, second batch) — portfolio / strategy backtest / credit data
 - **Catering / F&B template** — pending user demand confirmation
 - **Government / public sector template** — pending user demand confirmation
-- **Method modules** (`references/`) enhancement — time-series decomposition, anomaly detection, NLP sentiment (§2.4 roadmap)
+- **Method modules** (`references/`) enhancement — anomaly detection, NLP sentiment (§2.4 roadmap)
+
+---
+
+## v0.16.1 — 2026-06-15
+- Method-module end-to-end eval coverage: added T13 (time-series forecasting) and T14 (ML leakage & class imbalance) to eliminate the zero-eval coverage of `references/time-series.md` and `references/machine-learning.md` (P0-1 from the 2026-06-14 data-expert review) — T1–T12 all tested process/discipline/multi-source/IO, none exercised these two method modules end-to-end
+- `references/time-series.md` gained two hard-requirement sections (P1-1): **Model Order Selection** (ACF/PACF or AIC/BIC, `pmdarima.auto_arima` optional with manual fallback) and **Out-of-Sample Validation** (hold-out last k or walk-forward, report MAPE/MAE, compare against naive baseline) — a forecast never backtested can be confidently wrong; Standard Flow updated to steps 3 (order selection) and 5 (backtest)
+- 2 new test datasets in `generate_test_data.py` (seed 42 reproducible): `timeseries_monthly_sales.csv` (48 months, trend + yearly seasonality), `churn_users.csv` (1500 rows, ≈13% positives + an overt leak `account_status` and a covert leak `last_login_days_ago`)
+- iteration-6 RED-GREEN run: T13 with_skill (post-edit) ×3 all 6/6 PASS (SARIMA AIC/BIC grid, hold-out MAPE 1.4–2.1% vs seasonal-naive 9.4%, 95% CIs, six-section ECharts); T14 with_skill 5/5 PASS (leakage removed & retrained clean model AUC 0.87 vs leaky 0.999, P/R/F1/AUC for 13% imbalance, majority-class lift). **Honest finding**: T13 method-layer discrimination is weak — a strong-LLM baseline (n=1) also spontaneously did STL/ADF/backtest/CIs, refuting the P0-1 assumption; T13 discrimination actually sits in the reporting-standard layer (baseline used matplotlib base64, non-six-section) plus guarantee-value, consistent with the iteration-5 "guarantee + standardization" framing. T14 discrimination is clean. `machine-learning.md` unchanged (its three hard rules already suffice).
+- First PATCH release (three-segment version); v0.17 still planned for `stock.md` + time-series method enhancement
 
 ### Under consideration
 - Interactive data exploration phase before report generation (drill-down charts)

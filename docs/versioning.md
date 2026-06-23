@@ -47,7 +47,7 @@ v0.x 阶段允许破坏性变更（MINOR 即可含不兼容调整）。以下条
 | 核心流程冻结 | 五阶段流程 + 门禁规则不再有结构性变动 | ⬜ 待确认 |
 | 模板契约冻结 | `report_template.html` 头部数据契约承诺向后兼容 | ⬜ 待确认 |
 | 首批模版齐全 | 首批规划的行业模版全部交付（含 stock、finance） | ⬜ 进行中 |
-| Evals 全绿 | T1–T12 全部 with_skill 通过，且一轮 iteration 无新增失败 | T1–T7 ✅ iteration-1；T8–T12 ⬜ 待 iteration-5 |
+| Evals 全绿 | T1–T14 全部 with_skill 通过，且一轮 iteration 无新增失败 | T1–T7 ✅ iteration-1；T8–T12 ⬜ 待 iteration-5；T13–T14 ✅ iteration-6 |
 | 文档同步 | README / CLAUDE.md / 需求文档三者对齐，无滞后描述 | ⬜ 需检查 |
 
 v1.0.0 发布后，MINOR 升级承诺不破坏已有报告渲染。
@@ -59,10 +59,17 @@ v0.15 (2026-06-12)
  │  9 行业模版 · 5 方法模块 · Grid.js 表格双模式
  │
  ▼
-v0.16 (2026-06-14, 当前)
+v0.16 (2026-06-14)
  │  多数据集输入支持（Excel 多 sheet / CSV 多文件 / JSON 多结构）
  │  + references/data-sources.md + JSON/TSV 基础覆盖 + T8–T12
  │  里程碑：Phase 1 增加多源识别子步骤（非新增阶段，五阶段主线未变）
+ │
+ ▼
+v0.16.1 (2026-06-15, 当前)
+ │  方法模块端到端 eval 补全：T13（时序预测）/ T14（ML 泄漏与不平衡）
+ │  + time-series.md 补定阶依据 + 样本外回测两节（P1-1）
+ │  首次启用 PATCH 三段号（eval 补充 + 方法模块纪律收紧，无新模块/契约/流程变更）
+ │  判别力诚实记录：T13 方法层判别力弱（baseline 自发做回测），价值在报告规范+保证性
  │
  ▼
 v0.17
