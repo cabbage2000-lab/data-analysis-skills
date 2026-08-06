@@ -1,4 +1,4 @@
-# data-analysis-skill: Turn data files into analysis reports that tell a story
+# data-analysis-skills: Turn data files into analysis reports that tell a story
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![language](https://img.shields.io/badge/language-Chinese%20first-green)
@@ -17,9 +17,9 @@ This is an **Agent Skill** for data analysis — one package installs into [Clau
 
 | Host | User-level install path | How far it's verified |
 |------|-------------------------|-----------------------|
-| **Claude Code** | `~/.claude/skills/data-analysis-skill` | Primary host; the full T1–T14 eval suite passes |
-| **Codex CLI** | `~/.codex/skills/data-analysis-skill` | Adapted: task list via `update_plan`, the confirmation gate degrades to numbered plain-text choices; interactive end-to-end and `codex exec` smoke tests passed |
-| **WorkBuddy** | `~/.workbuddy/skills/data-analysis-skill` | Adapted: install path verified on a real machine, and **the author has confirmed it loads and runs in WorkBuddy**; the per-scenario S1–S5 rows of the [cross-host acceptance checklist](docs/跨宿主验收清单.md) are not filled in yet |
+| **Claude Code** | `~/.claude/skills/data-analysis-skills` | Primary host; the full T1–T14 eval suite passes |
+| **Codex CLI** | `~/.codex/skills/data-analysis-skills` | Adapted: task list via `update_plan`, the confirmation gate degrades to numbered plain-text choices; interactive end-to-end and `codex exec` smoke tests passed |
+| **WorkBuddy** | `~/.workbuddy/skills/data-analysis-skills` | Adapted: install path verified on a real machine, and **the author has confirmed it loads and runs in WorkBuddy**; the per-scenario S1–S5 rows of the [cross-host acceptance checklist](docs/跨宿主验收清单.md) are not filled in yet |
 | Other structurally identical tools | that tool's own skills directory | Anything that reads `SKILL.md` + frontmatter + subdirectory resources can load it; not individually tested |
 
 What stays **invariant** across hosts: the five-phase workflow, the Phase 1 confirmation gate, the statistical discipline, and the six-section report structure. What changes is only the **interaction surface**: if the host has a structured-questioning tool it is used (e.g. AskUserQuestion); if not, the questions degrade to numbered plain text and it waits for your reply. If the host has a task-list tool it is used (TodoWrite / update_plan); if not, the phase checklist is printed as plain text. **The gate itself never degrades — only its presentation does.**
@@ -40,11 +40,11 @@ Pick any one of the three routes below. **Open a new session afterwards** — se
 **Install into Claude Code** 👇
 
 ```text
-Please install the data-analysis-skill for me:
+Please install the data-analysis-skills for me:
 
-1. Clone https://github.com/cabbage2000-lab/data-analysis-skill into a temp directory
+1. Clone https://github.com/cabbage2000-lab/data-analysis-skills into a temp directory
 2. Make sure ~/.claude/skills/ exists (create it if not), then copy the repo's
-   skills/data-analysis-skill directory into it
+   skills/data-analysis-skills directory into it
    - Copy that one directory itself; do not nest the whole skills/ dir inside
    - Overwrite a same-named directory — that's how updating works
    - Do not touch any other skill in that directory, and never wipe the directory
@@ -56,11 +56,11 @@ Please install the data-analysis-skill for me:
 **Install into Codex** 👇
 
 ```text
-Please install the data-analysis-skill for me:
+Please install the data-analysis-skills for me:
 
-1. Clone https://github.com/cabbage2000-lab/data-analysis-skill into a temp directory
+1. Clone https://github.com/cabbage2000-lab/data-analysis-skills into a temp directory
 2. Make sure ~/.codex/skills/ exists (create it if not), then copy the repo's
-   skills/data-analysis-skill directory into it
+   skills/data-analysis-skills directory into it
    - Copy that one directory itself; do not nest the whole skills/ dir inside
    - Overwrite a same-named directory — that's how updating works
    - Do not touch any other skill in that directory, and never wipe the directory
@@ -72,14 +72,14 @@ Please install the data-analysis-skill for me:
 **Install into WorkBuddy** 👇
 
 ```text
-Please install the data-analysis-skill for me:
+Please install the data-analysis-skills for me:
 
-1. Clone https://github.com/cabbage2000-lab/data-analysis-skill into a temp directory
+1. Clone https://github.com/cabbage2000-lab/data-analysis-skills into a temp directory
 2. Make sure ~/.workbuddy/skills/ exists (create it if not), then copy the repo's
-   skills/data-analysis-skill directory into it
+   skills/data-analysis-skills directory into it
    - Copy that one directory itself, don't nest the whole skills/ dir inside —
      WorkBuddy names skills after the directory hierarchy, so an extra level turns
-     the skill name into skills:data-analysis-skill
+     the skill name into skills:data-analysis-skills
    - Overwrite a same-named directory — that's how updating works
    - Do not touch any other skill in that directory, and never wipe the directory
    - assets/ industries/ references/ evals/ must come along; missing any of them breaks links
@@ -96,17 +96,17 @@ This repository is itself a plugin marketplace; the upside is one-command update
 Claude Code — run these in a session:
 
 ```text
-/plugin marketplace add cabbage2000-lab/data-analysis-skill
-/plugin install data-analysis-skill@data-analysis-marketplace
+/plugin marketplace add cabbage2000-lab/data-analysis-skills
+/plugin install data-analysis-skills@data-analysis-marketplace
 ```
 
-Update with `/plugin update data-analysis-skill`.
+Update with `/plugin update data-analysis-skills`.
 
 Codex — run these in a terminal:
 
 ```bash
-codex plugin marketplace add cabbage2000-lab/data-analysis-skill
-codex plugin add data-analysis-skill@data-analysis-marketplace
+codex plugin marketplace add cabbage2000-lab/data-analysis-skills
+codex plugin add data-analysis-skills@data-analysis-marketplace
 ```
 
 WorkBuddy uses the Route A prompt (this repo does not yet ship a field-tested WorkBuddy plugin manifest).
@@ -116,8 +116,8 @@ Routes A and B install the same skill — **don't do both**, or you end up with 
 ### Route C: clone the repo + run the sync script (for anyone modifying the skill)
 
 ```bash
-git clone https://github.com/cabbage2000-lab/data-analysis-skill.git
-cd data-analysis-skill
+git clone https://github.com/cabbage2000-lab/data-analysis-skills.git
+cd data-analysis-skills
 
 # One command installs into every host detected on this machine:
 #   Claude Code always; Codex only when ~/.codex/ exists; WorkBuddy only when ~/.workbuddy/ exists
@@ -127,9 +127,9 @@ bash sync-to-user.sh
 If your skills directories live elsewhere, name them via env vars (this is also how you install into a project-level directory):
 
 ```bash
-DATA_ANALYSIS_CLAUDE_SKILL=/your/path/data-analysis-skill bash sync-to-user.sh
-DATA_ANALYSIS_CODEX_SKILL=/your/path/data-analysis-skill bash sync-to-user.sh
-DATA_ANALYSIS_WORKBUDDY_SKILL=/your/path/data-analysis-skill bash sync-to-user.sh
+DATA_ANALYSIS_CLAUDE_SKILL=/your/path/data-analysis-skills bash sync-to-user.sh
+DATA_ANALYSIS_CODEX_SKILL=/your/path/data-analysis-skills bash sync-to-user.sh
+DATA_ANALYSIS_WORKBUDDY_SKILL=/your/path/data-analysis-skills bash sync-to-user.sh
 ```
 
 To upgrade later, `git pull` and run the same command again.
@@ -146,7 +146,7 @@ To upgrade later, `git pull` and run the same command again.
    Analyze this sales data for me: retail_orders.csv — I need a report
    ```
 
-   You don't need to remember the skill's name — plain language matches it; naming `data-analysis-skill` explicitly works just as well.
+   You don't need to remember the skill's name — plain language matches it; naming `data-analysis-skills` explicitly works just as well.
 
 2. **Answer a few multiple-choice questions.** Before analyzing, it confirms your industry, analysis goal, and report audience (click-to-pick on hosts with a structured-questioning tool, numbered plain-text choices elsewhere). Don't skip this — it determines what the report analyzes and who it speaks to: an executive summary for your boss, or a detailed diagnosis for the ops team.
 
@@ -196,7 +196,7 @@ The skill works under professional discipline — it would rather say less than 
 ## FAQ
 
 **Installed it, but nothing happens?**
-Check three things: (1) it went into the skills directory of **the host you're actually using** (the three don't read each other's); (2) you copied the `data-analysis-skill` directory itself, not a `skills/` wrapper around it; (3) you opened a **new session** afterwards. In WorkBuddy, the "Skills" panel shows whether it's there.
+Check three things: (1) it went into the skills directory of **the host you're actually using** (the three don't read each other's); (2) you copied the `data-analysis-skills` directory itself, not a `skills/` wrapper around it; (3) you opened a **new session** afterwards. In WorkBuddy, the "Skills" panel shows whether it's there.
 
 **The report opens blank / charts don't render?**
 Chart libraries load from CDN, so opening the report requires internet access. The CDNs are chosen to be reachable from mainland China.
@@ -213,7 +213,7 @@ The confirmation step before a full report is deliberate: data that looks like r
 ## Repository layout
 
 ```
-skills/data-analysis-skill/      # the deliverable itself (this is what gets installed)
+skills/data-analysis-skills/      # the deliverable itself (this is what gets installed)
   SKILL.md                       #   core layer: five-phase workflow, gate, statistical discipline
   assets/report_template.html    #   single-file HTML report template (header comment = data contract)
   industries/                    #   9 industry templates (loaded on demand)

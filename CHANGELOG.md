@@ -1,9 +1,13 @@
 # Changelog
 
-All notable changes to the `data-analysis-skill` project are documented here.
-Version numbers align with the requirements document (`requirements/data-analysis-skill-需求文档-v0.4.md`).
+All notable changes to the `data-analysis-skills` project are documented here.
+Version numbers align with the requirements document (`requirements/data-analysis-skills-需求文档-v0.4.md`).
+Entries below v0.18 keep the names in use at the time (`data-analysis-skill`, and `data-analysis` before v0.14) — they are historical records, not current paths.
 
 ## [Unreleased]
+
+### chore
+- **Project + skill renamed `data-analysis-skill` → `data-analysis-skills`** (user decision) — GitHub repo, local project directory and skill identity realigned, same as the v0.14 rename. Changed: skill dir `skills/data-analysis-skill/` → `skills/data-analysis-skills/`, SKILL.md `name`, `evals.json` `skill_name` + the 15 hard-coded absolute paths, the four plugin/marketplace manifests (`name` / `homepage` / `repository` / `displayName` / `websiteURL`), `sync-to-user.sh` source + all three install targets, report-template colophon, `examples/sample_report.html`, README / README.en / CLAUDE.md / requirements docs (both filenames too), git remote URL. Project-identity alignment, **not a functional requirements change** — the five-phase workflow and statistical discipline are untouched. Existing users must reinstall: the old `data-analysis-skill` directory in each host's skills dir is not overwritten by the new name and should be removed manually
 
 ### Planned
 - **Stock market template `stock.md`** (#11, design approved 2026-06-10) — individual stock OHLCV + valuation

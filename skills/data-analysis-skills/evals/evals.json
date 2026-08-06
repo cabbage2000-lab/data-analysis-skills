@@ -1,12 +1,12 @@
 {
-  "skill_name": "data-analysis-skill",
-  "test_data_dir": "/Users/blingabc/PycharmProjects/data-analysis-skill/skills/data-analysis-workspace/test-data",
+  "skill_name": "data-analysis-skills",
+  "test_data_dir": "/Users/blingabc/PycharmProjects/data-analysis-skills/skills/data-analysis-workspace/test-data",
   "evals": [
     {
       "id": 1,
       "name": "retail-gate",
       "maps_to": "需求§13-T1：阶段1门禁（行业确认+目标澄清）",
-      "prompt": "帮我分析一下这份数据：/Users/blingabc/PycharmProjects/data-analysis-skill/skills/data-analysis-workspace/test-data/retail_orders.csv",
+      "prompt": "帮我分析一下这份数据：/Users/blingabc/PycharmProjects/data-analysis-skills/skills/data-analysis-workspace/test-data/retail_orders.csv",
       "expected_output": "识别为零售/电商行业并向用户确认行业与分析目标（选择题形式、合并为一轮提问），在用户确认前不产出完整分析报告",
       "files": ["retail_orders.csv"],
       "assertions": [
@@ -19,7 +19,7 @@
       "id": 2,
       "name": "benchmark-fabrication",
       "maps_to": "需求§13-T2：行业基准纪律（不杜撰外部基准）",
-      "prompt": "分析 /Users/blingabc/PycharmProjects/data-analysis-skill/skills/data-analysis-workspace/test-data/retail_orders.csv，算一下各品类的退货率，再告诉我：我们的退货率和行业平均水平比是高还是低？",
+      "prompt": "分析 /Users/blingabc/PycharmProjects/data-analysis-skills/skills/data-analysis-workspace/test-data/retail_orders.csv，算一下各品类的退货率，再告诉我：我们的退货率和行业平均水平比是高还是低？",
       "expected_output": "计算各品类内部退货率；不杜撰行业平均值，说明基准需用户提供或授权联网检索并标注来源",
       "files": ["retail_orders.csv"],
       "assertions": [
@@ -32,7 +32,7 @@
       "id": 3,
       "name": "causal-language",
       "maps_to": "需求§13-T3：统计纪律（相关≠因果，提示混杂）",
-      "prompt": "分析 /Users/blingabc/PycharmProjects/data-analysis-skill/skills/data-analysis-workspace/test-data/ad_sales_monthly.csv 里广告投入和销售额的关系。是不是广告投入带动了销售增长？给我一个明确的结论。",
+      "prompt": "分析 /Users/blingabc/PycharmProjects/data-analysis-skills/skills/data-analysis-workspace/test-data/ad_sales_monthly.csv 里广告投入和销售额的关系。是不是广告投入带动了销售增长？给我一个明确的结论。",
       "expected_output": "报告相关性与强度，措辞谨慎；主动提示促销天数/季节性混杂；说明确立因果所需的方法与数据条件，不直接断言因果",
       "files": ["ad_sales_monthly.csv"],
       "assertions": [
@@ -46,7 +46,7 @@
       "id": 4,
       "name": "small-sample",
       "maps_to": "需求§13-T4：小样本降级（统计功效限制）",
-      "prompt": "/Users/blingabc/PycharmProjects/data-analysis-skill/skills/data-analysis-workspace/test-data/ab_test_small.csv 是我们 A/B 测试的结果，帮我验证 B 版本是不是显著更好。老板今天就要结论，直接告诉我 B 是不是赢了。",
+      "prompt": "/Users/blingabc/PycharmProjects/data-analysis-skills/skills/data-analysis-workspace/test-data/ab_test_small.csv 是我们 A/B 测试的结果，帮我验证 B 版本是不是显著更好。老板今天就要结论，直接告诉我 B 是不是赢了。",
       "expected_output": "指出每组仅 10 人、统计功效不足，不强行宣称显著；给出描述性对比与所需样本量建议",
       "files": ["ab_test_small.csv"],
       "assertions": [
@@ -60,7 +60,7 @@
       "id": 5,
       "name": "unknown-industry",
       "maps_to": "需求§13-T5：行业识别降级（低置信度给选项）",
-      "prompt": "分析一下 /Users/blingabc/PycharmProjects/data-analysis-skill/skills/data-analysis-workspace/test-data/masked_data.csv",
+      "prompt": "分析一下 /Users/blingabc/PycharmProjects/data-analysis-skills/skills/data-analysis-workspace/test-data/masked_data.csv",
       "expected_output": "字段脱敏无法推断行业：向用户提供 3-4 个行业选项、或说明将按通用框架分析，不自行编造行业背景",
       "files": ["masked_data.csv"],
       "assertions": [
@@ -72,7 +72,7 @@
       "id": 6,
       "name": "saas-full-report",
       "maps_to": "需求§13-T6：直通全流程（信息齐备不打断，产出合格报告）",
-      "prompt": "这是我们 SaaS 产品过去 36 个月的经营数据：/Users/blingabc/PycharmProjects/data-analysis-skill/skills/data-analysis-workspace/test-data/saas_metrics.csv。我是创始人，想看增长和留存的整体状况，重点关注最近半年的变化。按 SaaS 业务的惯例来分析，最后给我一份 HTML 报告。",
+      "prompt": "这是我们 SaaS 产品过去 36 个月的经营数据：/Users/blingabc/PycharmProjects/data-analysis-skills/skills/data-analysis-workspace/test-data/saas_metrics.csv。我是创始人，想看增长和留存的整体状况，重点关注最近半年的变化。按 SaaS 业务的惯例来分析，最后给我一份 HTML 报告。",
       "expected_output": "信息已齐备，不再追加提问；完成分析并产出单文件 HTML 报告：六段式结构、结论先行、ECharts 经固定版本 CDN 引入、每图配解读、附数据处理说明；识别出近 6 个月增速放缓与流失抬头",
       "files": ["saas_metrics.csv"],
       "assertions": [
@@ -89,7 +89,7 @@
       "id": 7,
       "name": "finance-template-application",
       "maps_to": "需求§13-T7：企业财务模版应用（KPI 口径、主题组织、缺字段不臆造）",
-      "prompt": "这是我们公司近两年各事业部的月度损益数据（含预算）：/Users/blingabc/PycharmProjects/data-analysis-skill/skills/data-analysis-workspace/test-data/finance_pnl.csv。我是财务负责人，想看整体盈利状况和费用管控情况，重点关注预算执行偏差出在哪里。受众是管理层，最后给我一份 HTML 报告。",
+      "prompt": "这是我们公司近两年各事业部的月度损益数据（含预算）：/Users/blingabc/PycharmProjects/data-analysis-skills/skills/data-analysis-workspace/test-data/finance_pnl.csv。我是财务负责人，想看整体盈利状况和费用管控情况，重点关注预算执行偏差出在哪里。受众是管理层，最后给我一份 HTML 报告。",
       "expected_output": "识别为企业财务场景并按 corporate-finance.md 模版分析：按财务口径计算毛利率、费用率、预算执行率/偏差率；深入分析按模版主题组织（利润结构与趋势、费用结构、预算偏差、事业部对比）；发现研发费用持续超预算、西部事业部毛利率下滑、Q4 收入冲高中至少两个信号；数据不含现金流/应收，报告说明而不臆造；单文件 HTML 六段式结论先行",
       "files": ["finance_pnl.csv"],
       "assertions": [
@@ -105,7 +105,7 @@
       "id": 8,
       "name": "excel-multi-sheet",
       "maps_to": "需求§13-T8：多 sheet 识别与融合分析（反静默丢失）",
-      "prompt": "帮我分析一下这份数据：/Users/blingabc/PycharmProjects/data-analysis-skill/skills/data-analysis-workspace/test-data/excel_multi_sheet.xlsx",
+      "prompt": "帮我分析一下这份数据：/Users/blingabc/PycharmProjects/data-analysis-skills/skills/data-analysis-workspace/test-data/excel_multi_sheet.xlsx",
       "expected_output": "识别 Excel 含多个 sheet（orders/customers/products），枚举全部 sheet 并向用户说明；不静默只读第一个 sheet；确认关联策略（融合 join 或分源）后完成六段式 HTML 报告",
       "files": ["excel_multi_sheet.xlsx"],
       "assertions": [
@@ -119,7 +119,7 @@
       "id": 9,
       "name": "multi-csv-relational",
       "maps_to": "需求§13-T9：多文件识别与 join 分析（反静默丢失）",
-      "prompt": "这是我们最近一年的交易相关数据，分别放在三个文件里，帮我关联起来整体分析一下：/Users/blingabc/PycharmProjects/data-analysis-skill/skills/data-analysis-workspace/test-data/linked_orders.csv /Users/blingabc/PycharmProjects/data-analysis-skill/skills/data-analysis-workspace/test-data/linked_customers.csv /Users/blingabc/PycharmProjects/data-analysis-skill/skills/data-analysis-workspace/test-data/linked_products.csv",
+      "prompt": "这是我们最近一年的交易相关数据，分别放在三个文件里，帮我关联起来整体分析一下：/Users/blingabc/PycharmProjects/data-analysis-skills/skills/data-analysis-workspace/test-data/linked_orders.csv /Users/blingabc/PycharmProjects/data-analysis-skills/skills/data-analysis-workspace/test-data/linked_customers.csv /Users/blingabc/PycharmProjects/data-analysis-skills/skills/data-analysis-workspace/test-data/linked_products.csv",
       "expected_output": "识别三个 CSV 文件为多源输入；列出全部文件；确认关联键（customer_id/product_id）后 join 融合分析；不静默只处理被点名的文件；六段式 HTML 报告",
       "files": ["linked_orders.csv", "linked_customers.csv", "linked_products.csv"],
       "assertions": [
@@ -133,7 +133,7 @@
       "id": 10,
       "name": "json-multi-key",
       "maps_to": "需求§13-T10：JSON 多结构识别（反静默丢失）",
-      "prompt": "帮我分析一下这份数据：/Users/blingabc/PycharmProjects/data-analysis-skill/skills/data-analysis-workspace/test-data/multi_key.json",
+      "prompt": "帮我分析一下这份数据：/Users/blingabc/PycharmProjects/data-analysis-skills/skills/data-analysis-workspace/test-data/multi_key.json",
       "expected_output": "识别 JSON 顶层为含多个数组键的 dict（orders/customers/products），等价多 sheet；不静默合并或丢键；确认策略后分析；六段式 HTML 报告",
       "files": ["multi_key.json"],
       "assertions": [
@@ -147,7 +147,7 @@
       "id": 11,
       "name": "json-single-table",
       "maps_to": "需求§13-T11：JSON 单表基础覆盖（消除纸面支持）",
-      "prompt": "这是我们各区域近两年的月度销售汇总：/Users/blingabc/PycharmProjects/data-analysis-skill/skills/data-analysis-workspace/test-data/simple.json。帮我看看整体趋势和区域差异，最后给我一份 HTML 报告。",
+      "prompt": "这是我们各区域近两年的月度销售汇总：/Users/blingabc/PycharmProjects/data-analysis-skills/skills/data-analysis-workspace/test-data/simple.json。帮我看看整体趋势和区域差异，最后给我一份 HTML 报告。",
       "expected_output": "正确读取 JSON 记录数组（72 条记录）为单表；完成标准 EDA 与六段式 HTML 报告；证明 JSON 输入路径可用（此前 test-data 0 个 JSON）",
       "files": ["simple.json"],
       "assertions": [
@@ -161,7 +161,7 @@
       "id": 12,
       "name": "tsv-single-table",
       "maps_to": "需求§13-T12：TSV 单表基础覆盖（消除纸面支持）",
-      "prompt": "帮我分析一下这份数据：/Users/blingabc/PycharmProjects/data-analysis-skill/skills/data-analysis-workspace/test-data/sample.tsv。想看看各门店和品类的销售表现，最后给我一份 HTML 报告。",
+      "prompt": "帮我分析一下这份数据：/Users/blingabc/PycharmProjects/data-analysis-skills/skills/data-analysis-workspace/test-data/sample.tsv。想看看各门店和品类的销售表现，最后给我一份 HTML 报告。",
       "expected_output": "正确读取 TSV（tab 分隔，300 行）为单表；完成标准 EDA 与六段式 HTML 报告；证明 TSV 输入路径可用（此前 test-data 0 个 TSV）",
       "files": ["sample.tsv"],
       "assertions": [
@@ -175,7 +175,7 @@
       "id": 13,
       "name": "timeseries-forecast-validation",
       "maps_to": "需求§13-T13：时间序列预测（STL/ADF/定阶/样本外回测/区间预测）",
-      "prompt": "这是我们过去四年的月度销售额数据：/Users/blingabc/PycharmProjects/data-analysis-skill/skills/data-analysis-workspace/test-data/timeseries_monthly_sales.csv。帮我分析销售的趋势和季节性，并预测未来 6 个月的走势，最后给我一份 HTML 报告。",
+      "prompt": "这是我们过去四年的月度销售额数据：/Users/blingabc/PycharmProjects/data-analysis-skills/skills/data-analysis-workspace/test-data/timeseries_monthly_sales.csv。帮我分析销售的趋势和季节性，并预测未来 6 个月的走势，最后给我一份 HTML 报告。",
       "expected_output": "识别为单变量月度时间序列：做 STL 分解（趋势/季节/残差，分解图入报告）与 ADF 平稳性检验；给出模型定阶依据（ACF/PACF 或 AIC/BIC 或 auto_arima）；预测前做样本外回测（留出最后若干月或 walk-forward）并报告 MAPE/MAE；最终预测带 95% 置信区间且 horizon≤历史 1/4；单文件六段式 HTML 报告、结论先行、ECharts 固定版本 CDN",
       "files": ["timeseries_monthly_sales.csv"],
       "assertions": [
@@ -191,7 +191,7 @@
       "id": 14,
       "name": "ml-leakage-imbalance",
       "maps_to": "需求§13-T14：机器学习（泄漏自检/类别不平衡/baseline lift）",
-      "prompt": "这是我们的用户数据：/Users/blingabc/PycharmProjects/data-analysis-skill/skills/data-analysis-workspace/test-data/churn_users.csv。帮我建个模型预测哪些用户会流失，并告诉我哪些因素和流失最相关。最后给我一份 HTML 报告。",
+      "prompt": "这是我们的用户数据：/Users/blingabc/PycharmProjects/data-analysis-skills/skills/data-analysis-workspace/test-data/churn_users.csv。帮我建个模型预测哪些用户会流失，并告诉我哪些因素和流失最相关。最后给我一份 HTML 报告。",
       "expected_output": "建立流失分类模型前自检并移除特征泄漏列（account_status 直接等价标签、last_login_days_ago 为事后特征），并在处理说明记录；正样本约 13%（类别不平衡）→ 不以 accuracy 为主指标，改报 precision/recall/F1/AUC 并说明业务更关心哪类错误；报告对多数类 naive baseline 的 lift；声明训练/测试划分；特征重要性用『对模型判别贡献最大』措辞而非因果断言；单文件六段式 HTML 报告",
       "files": ["churn_users.csv"],
       "assertions": [

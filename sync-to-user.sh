@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Sync this repo's data-analysis-skill into user-level agent-host skills dirs.
+# Sync this repo's data-analysis-skills into user-level agent-host skills dirs.
 #
-# Mirrors `skills/data-analysis-skill/` with `rsync --delete` so SKILL.md and its
+# Mirrors `skills/data-analysis-skills/` with `rsync --delete` so SKILL.md and its
 # assets/ industries/ references/ evals/ resources stay together in the
 # installed skill.
 #
 # Targets (user-level):
-#   - Claude Code: ~/.claude/skills/data-analysis-skill      (always)
-#   - Codex CLI:   ~/.codex/skills/data-analysis-skill       (only when ~/.codex/ exists)
-#   - WorkBuddy:   ~/.workbuddy/skills/data-analysis-skill   (only when ~/.workbuddy/ exists)
+#   - Claude Code: ~/.claude/skills/data-analysis-skills      (always)
+#   - Codex CLI:   ~/.codex/skills/data-analysis-skills       (only when ~/.codex/ exists)
+#   - WorkBuddy:   ~/.workbuddy/skills/data-analysis-skills   (only when ~/.workbuddy/ exists)
 #
 # The three hosts do not read each other's skill directories — install into every
 # host you actually use. The package itself is host-neutral: SKILL.md names the
@@ -22,21 +22,21 @@
 # underlying CodeBuddy-kernel name), NOT <proj>/.workbuddy/skills/.
 #
 # Usage (from anywhere):
-#   bash /path/to/data-analysis-skill/sync-to-user.sh
+#   bash /path/to/data-analysis-skills/sync-to-user.sh
 #
 # Destinations (override with env vars if your skills live elsewhere):
-#   DATA_ANALYSIS_CLAUDE_SKILL     (default ~/.claude/skills/data-analysis-skill)
-#   DATA_ANALYSIS_CODEX_SKILL      (default ~/.codex/skills/data-analysis-skill)
-#   DATA_ANALYSIS_WORKBUDDY_SKILL  (default ~/.workbuddy/skills/data-analysis-skill)
+#   DATA_ANALYSIS_CLAUDE_SKILL     (default ~/.claude/skills/data-analysis-skills)
+#   DATA_ANALYSIS_CODEX_SKILL      (default ~/.codex/skills/data-analysis-skills)
+#   DATA_ANALYSIS_WORKBUDDY_SKILL  (default ~/.workbuddy/skills/data-analysis-skills)
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SRC_SKILL="$SCRIPT_DIR/skills/data-analysis-skill"
+SRC_SKILL="$SCRIPT_DIR/skills/data-analysis-skills"
 
-CLAUDE_SKILL="${DATA_ANALYSIS_CLAUDE_SKILL:-$HOME/.claude/skills/data-analysis-skill}"
-CODEX_SKILL="${DATA_ANALYSIS_CODEX_SKILL:-$HOME/.codex/skills/data-analysis-skill}"
-WORKBUDDY_SKILL="${DATA_ANALYSIS_WORKBUDDY_SKILL:-$HOME/.workbuddy/skills/data-analysis-skill}"
+CLAUDE_SKILL="${DATA_ANALYSIS_CLAUDE_SKILL:-$HOME/.claude/skills/data-analysis-skills}"
+CODEX_SKILL="${DATA_ANALYSIS_CODEX_SKILL:-$HOME/.codex/skills/data-analysis-skills}"
+WORKBUDDY_SKILL="${DATA_ANALYSIS_WORKBUDDY_SKILL:-$HOME/.workbuddy/skills/data-analysis-skills}"
 
 if [[ ! -f "$SRC_SKILL/SKILL.md" ]]; then
   echo "error: SKILL.md not found at $SRC_SKILL/SKILL.md" >&2

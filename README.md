@@ -1,4 +1,4 @@
-# data-analysis-skill：把数据文件变成会讲故事的分析报告
+# data-analysis-skills：把数据文件变成会讲故事的分析报告
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![language](https://img.shields.io/badge/language-简体中文优先-green)
@@ -17,9 +17,9 @@
 
 | 宿主 | 用户级安装位置 | 验证到什么程度 |
 |------|----------------|----------------|
-| **Claude Code** | `~/.claude/skills/data-analysis-skill` | 主力宿主，T1–T14 全量 eval 通过 |
-| **Codex CLI** | `~/.codex/skills/data-analysis-skill` | 已适配：任务清单走 `update_plan`、门禁提问降级为文本编号选择题；交互式全流程与 `codex exec` 冒烟验收通过 |
-| **WorkBuddy** | `~/.workbuddy/skills/data-analysis-skill` | 已适配：安装路径已实测就位，**作者已在 WorkBuddy 实测可加载、可运行**；[跨宿主验收清单](docs/跨宿主验收清单.md)的 S1–S5 逐项核对尚未回填 |
+| **Claude Code** | `~/.claude/skills/data-analysis-skills` | 主力宿主，T1–T14 全量 eval 通过 |
+| **Codex CLI** | `~/.codex/skills/data-analysis-skills` | 已适配：任务清单走 `update_plan`、门禁提问降级为文本编号选择题；交互式全流程与 `codex exec` 冒烟验收通过 |
+| **WorkBuddy** | `~/.workbuddy/skills/data-analysis-skills` | 已适配：安装路径已实测就位，**作者已在 WorkBuddy 实测可加载、可运行**；[跨宿主验收清单](docs/跨宿主验收清单.md)的 S1–S5 逐项核对尚未回填 |
 | 其它同构工具 | 该工具自己的 skills 目录 | 只要读 `SKILL.md` + frontmatter + 子目录资源就能加载，未逐一实测 |
 
 跨宿主的**不变量**：五阶段流程、阶段 1 确认门禁、统计纪律、报告六段式结构——这些不因宿主而变。**变的只有交互外观**：宿主有结构化提问工具就用（如 AskUserQuestion），没有就降级成编号文本选择题并等你回复；有任务清单工具就用（TodoWrite / update_plan），没有就打印纯文本阶段清单。**门禁本身从不降级，只有它的呈现方式会降级。**
@@ -40,11 +40,11 @@
 **装到 Claude Code** 👇
 
 ```text
-帮我安装 data-analysis-skill 数据分析 skill：
+帮我安装 data-analysis-skills 数据分析 skill：
 
-1. 把 https://github.com/cabbage2000-lab/data-analysis-skill 克隆到一个临时目录
+1. 把 https://github.com/cabbage2000-lab/data-analysis-skills 克隆到一个临时目录
 2. 确保 ~/.claude/skills/ 存在（没有就创建），把仓库里的
-   skills/data-analysis-skill 整个目录复制进去
+   skills/data-analysis-skills 整个目录复制进去
    - 复制的是这一个目录本身，不要把整个 skills/ 套进去
    - 同名目录直接覆盖，这就是更新
    - 该目录下其他来源的 skill 一个都别动，千万不要清空目录
@@ -56,11 +56,11 @@
 **装到 Codex** 👇
 
 ```text
-帮我安装 data-analysis-skill 数据分析 skill：
+帮我安装 data-analysis-skills 数据分析 skill：
 
-1. 把 https://github.com/cabbage2000-lab/data-analysis-skill 克隆到一个临时目录
+1. 把 https://github.com/cabbage2000-lab/data-analysis-skills 克隆到一个临时目录
 2. 确保 ~/.codex/skills/ 存在（没有就创建），把仓库里的
-   skills/data-analysis-skill 整个目录复制进去
+   skills/data-analysis-skills 整个目录复制进去
    - 复制的是这一个目录本身，不要把整个 skills/ 套进去
    - 同名目录直接覆盖，这就是更新
    - 该目录下其他来源的 skill 一个都别动，千万不要清空目录
@@ -72,13 +72,13 @@
 **装到 WorkBuddy** 👇
 
 ```text
-帮我安装 data-analysis-skill 数据分析 skill：
+帮我安装 data-analysis-skills 数据分析 skill：
 
-1. 把 https://github.com/cabbage2000-lab/data-analysis-skill 克隆到一个临时目录
+1. 把 https://github.com/cabbage2000-lab/data-analysis-skills 克隆到一个临时目录
 2. 确保 ~/.workbuddy/skills/ 存在（没有就创建），把仓库里的
-   skills/data-analysis-skill 整个目录复制进去
+   skills/data-analysis-skills 整个目录复制进去
    - 复制的是这一个目录本身，别把整个 skills/ 目录整体套进去——WorkBuddy 会按
-     目录层级给技能命名，多套一层技能名就变成 skills:data-analysis-skill 了
+     目录层级给技能命名，多套一层技能名就变成 skills:data-analysis-skills 了
    - 同名目录直接覆盖，这就是更新
    - 该目录下其他来源的 skill 一个都别动，千万不要清空目录
    - 目录里的 assets/ industries/ references/ evals/ 必须一起带上，缺任何一个都会断链
@@ -95,17 +95,17 @@ WorkBuddy 还可以在「技能」面板里核对是否装上。
 Claude Code——在会话里依次执行：
 
 ```text
-/plugin marketplace add cabbage2000-lab/data-analysis-skill
-/plugin install data-analysis-skill@data-analysis-marketplace
+/plugin marketplace add cabbage2000-lab/data-analysis-skills
+/plugin install data-analysis-skills@data-analysis-marketplace
 ```
 
-更新用 `/plugin update data-analysis-skill`。
+更新用 `/plugin update data-analysis-skills`。
 
 Codex——在终端里执行：
 
 ```bash
-codex plugin marketplace add cabbage2000-lab/data-analysis-skill
-codex plugin add data-analysis-skill@data-analysis-marketplace
+codex plugin marketplace add cabbage2000-lab/data-analysis-skills
+codex plugin add data-analysis-skills@data-analysis-marketplace
 ```
 
 WorkBuddy 走方式 A 的提示词路径（本仓库尚未提供经实测的 WorkBuddy 插件清单）。
@@ -115,8 +115,8 @@ WorkBuddy 走方式 A 的提示词路径（本仓库尚未提供经实测的 Wor
 ### 方式 C：克隆仓库 + 同步脚本（想改 skill 的人用这个）
 
 ```bash
-git clone https://github.com/cabbage2000-lab/data-analysis-skill.git
-cd data-analysis-skill
+git clone https://github.com/cabbage2000-lab/data-analysis-skills.git
+cd data-analysis-skills
 
 # 一条命令装进本机检测到的每一个宿主：
 #   Claude Code 总装；Codex 仅当 ~/.codex/ 存在；WorkBuddy 仅当 ~/.workbuddy/ 存在
@@ -126,9 +126,9 @@ bash sync-to-user.sh
 skills 目录不在默认位置时，用环境变量指定（也可以用它装到项目级目录）：
 
 ```bash
-DATA_ANALYSIS_CLAUDE_SKILL=/your/path/data-analysis-skill bash sync-to-user.sh
-DATA_ANALYSIS_CODEX_SKILL=/your/path/data-analysis-skill bash sync-to-user.sh
-DATA_ANALYSIS_WORKBUDDY_SKILL=/your/path/data-analysis-skill bash sync-to-user.sh
+DATA_ANALYSIS_CLAUDE_SKILL=/your/path/data-analysis-skills bash sync-to-user.sh
+DATA_ANALYSIS_CODEX_SKILL=/your/path/data-analysis-skills bash sync-to-user.sh
+DATA_ANALYSIS_WORKBUDDY_SKILL=/your/path/data-analysis-skills bash sync-to-user.sh
 ```
 
 以后想升级，`git pull` 后再跑一遍同一命令即可。
@@ -145,7 +145,7 @@ DATA_ANALYSIS_WORKBUDDY_SKILL=/your/path/data-analysis-skill bash sync-to-user.s
    帮我分析这份销售数据：retail_orders.csv，给我一份报告
    ```
 
-   不用背 skill 名字，说人话就会被匹配到；也可以显式点名 `data-analysis-skill`，两种等价。
+   不用背 skill 名字，说人话就会被匹配到；也可以显式点名 `data-analysis-skills`，两种等价。
 
 2. **回答几个选择题。** 开始分析前它会和你确认行业、分析目标、报告受众（有结构化提问工具的宿主是点选，没有的是编号文本选择题）。别嫌烦——这一步决定报告「分析什么、对谁说话」，是给老板看的经营结论，还是给运营同学看的细节诊断。
 
@@ -195,7 +195,7 @@ DATA_ANALYSIS_WORKBUDDY_SKILL=/your/path/data-analysis-skill bash sync-to-user.s
 ## 常见问题
 
 **装完了但它没反应？**
-先确认三件事：① 装的位置是**你正在用的那个宿主**的 skills 目录（三家互不读取）；② 装的是 `data-analysis-skill` 这个目录本身，而不是外面套了一层 `skills/`；③ 装完**新开了一个会话**。WorkBuddy 可以在「技能」面板里直接看有没有。
+先确认三件事：① 装的位置是**你正在用的那个宿主**的 skills 目录（三家互不读取）；② 装的是 `data-analysis-skills` 这个目录本身，而不是外面套了一层 `skills/`；③ 装完**新开了一个会话**。WorkBuddy 可以在「技能」面板里直接看有没有。
 
 **报告打开是空白的 / 图表不显示？**
 报告的图表库通过 CDN 引入，打开时需要联网。CDN 选用的是国内可达的源。
@@ -212,7 +212,7 @@ DATA_ANALYSIS_WORKBUDDY_SKILL=/your/path/data-analysis-skill bash sync-to-user.s
 ## 仓库结构
 
 ```
-skills/data-analysis-skill/      # 交付物本体（装到宿主里的就是这个目录）
+skills/data-analysis-skills/      # 交付物本体（装到宿主里的就是这个目录）
   SKILL.md                       #   核心层：五阶段流程、门禁、统计纪律
   assets/report_template.html    #   单文件 HTML 报告模板（头部注释是数据契约）
   industries/                    #   行业模版 9 个（按需加载）

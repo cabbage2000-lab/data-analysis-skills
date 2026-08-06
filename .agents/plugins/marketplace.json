@@ -1,11 +1,11 @@
 {
   "name": "data-analysis-marketplace",
   "interface": {
-    "displayName": "data-analysis-skill"
+    "displayName": "data-analysis-skills"
   },
   "plugins": [
     {
-      "name": "data-analysis-skill",
+      "name": "data-analysis-skills",
       "source": {
         "source": "local",
         "path": "./"

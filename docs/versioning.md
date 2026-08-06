@@ -1,6 +1,6 @@
 # 版本号规划
 
-> 适用于 `data-analysis-skill` 项目，从 v0.15 起正式执行。
+> 适用于 `data-analysis-skills` 项目，从 v0.15 起正式执行。
 
 ## 版本模型
 

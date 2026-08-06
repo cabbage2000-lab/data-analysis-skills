@@ -1,9 +1,9 @@
 ---
-name: data-analysis-skill
+name: data-analysis-skills
 description: Use when the user provides data files (CSV/Excel/JSON/TSV) or tabular data and wants analysis, insights, or a report — e.g. 分析数据、做数据报告、数据洞察, sales/operations/business data review, EDA, A/B test evaluation, forecasting, or an interactive HTML data report. Not for building dashboard apps, web scraping, or live database connections.
 ---
 
-# data-analysis-skill: Industry-Aware Data Analysis & Narrative Reporting
+# data-analysis-skills: Industry-Aware Data Analysis & Narrative Reporting
 
 ## Overview
 
