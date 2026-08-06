@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![language](https://img.shields.io/badge/language-Chinese%20first-green)
-![status](https://img.shields.io/badge/status-v0.17-blue)
+![status](https://img.shields.io/badge/status-v0.18-blue)
 ![host](https://img.shields.io/badge/host-Claude%20Code%20%7C%20Codex%20%7C%20WorkBuddy-grey)
 
 [简体中文](README.md) | **English**

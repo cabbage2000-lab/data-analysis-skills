@@ -6,15 +6,30 @@ Entries below v0.18 keep the names in use at the time (`data-analysis-skill`, an
 
 ## [Unreleased]
 
-### chore
-- **Project + skill renamed `data-analysis-skill` → `data-analysis-skills`** (user decision) — GitHub repo, local project directory and skill identity realigned, same as the v0.14 rename. Changed: skill dir `skills/data-analysis-skill/` → `skills/data-analysis-skills/`, SKILL.md `name`, `evals.json` `skill_name` + the 15 hard-coded absolute paths, the four plugin/marketplace manifests (`name` / `homepage` / `repository` / `displayName` / `websiteURL`), `sync-to-user.sh` source + all three install targets, report-template colophon, `examples/sample_report.html`, README / README.en / CLAUDE.md / requirements docs (both filenames too), git remote URL. Project-identity alignment, **not a functional requirements change** — the five-phase workflow and statistical discipline are untouched. Existing users must reinstall: the old `data-analysis-skill` directory in each host's skills dir is not overwritten by the new name and should be removed manually
-
 ### Planned
-- **Stock market template `stock.md`** (#11, design approved 2026-06-10) — individual stock OHLCV + valuation
+- **Stock market template `stock.md`** (#11, design approved 2026-06-10) — individual stock OHLCV + valuation, deferred to v0.19 by this release
 - **Finance / quant template `finance.md`** (#2, second batch) — portfolio / strategy backtest / credit data
 - **Catering / F&B template** — pending user demand confirmation
 - **Government / public sector template** — pending user demand confirmation
 - **Method modules** (`references/`) enhancement — anomaly detection, NLP sentiment (§2.4 roadmap)
+
+---
+
+## v0.18 — 2026-08-06
+
+### chore
+- **Project + skill renamed `data-analysis-skill` → `data-analysis-skills`** (user decision) — GitHub repo, local project directory and skill identity realigned, same as the v0.14 rename. Changed: skill dir `skills/data-analysis-skill/` → `skills/data-analysis-skills/` (via `git mv`, all 18 files recorded as renames), SKILL.md `name`, `evals.json` `skill_name` + the 15 hard-coded absolute paths, the four plugin/marketplace manifests (`name` / `homepage` / `repository` / `displayName` / `websiteURL`), `sync-to-user.sh` source + all three install targets, report-template colophon, `examples/sample_report.html`, README / README.en / CLAUDE.md / requirements docs (both filenames too), git remote URL. Project-identity alignment, **not a functional requirements change** — the five-phase workflow, gates, statistical discipline and template data contract are all untouched
+- **Four latent breakages fixed along the way** — each already broken by the directory rename, none visible to a plain `grep` because this machine's `grep` honours `.gitignore` and `skills/data-analysis-workspace/`, `requirements/` and `CLAUDE.md` are all ignored: (1) `~/.claude/skills/data-analysis-skill` was a symlink into the old repo path and had gone dangling — the skill no longer loaded in Claude Code; (2) `evals.json`'s `test_data_dir` plus 14 prompt paths (15 absolute paths total) pointed at the old directory, so no eval could run; (3) `validate_template.py:11` hard-coded the old template path; (4) `.claude/settings.local.json` held 7 stale absolute paths in its permission allowlist and `additionalDirectories`
+- Version bumped **0.17.0 → 0.18.0** across all three manifests. This takes the MINOR slot on the v0.14 precedent (a rename changes the skill's `name`, install paths and plugin package identity — caller-visible, and v0.x permits breaking changes at MINOR), pushing `stock.md` + method-module enhancement from v0.18 to v0.19 and the rest of the roadmap one step back
+
+### docs
+- `docs/versioning.md`: bump-rule table gained a **project/skill rename** row (MINOR, precedent v0.14 and this release); roadmap re-dated
+- Historical entries are deliberately **not** back-renamed — CHANGELOG entries below v0.18, the requirements document's change-log appendices, `docs/superpowers/` implementation plans and the `iteration-N` eval records all keep the names in use at the time. A note to that effect now heads this file and the appendix section
+- `DATA_ANALYSIS_CLAUDE_SKILL` / `DATA_ANALYSIS_CODEX_SKILL` / `DATA_ANALYSIS_WORKBUDDY_SKILL` keep their names — they read from the "data analysis" semantics, not the repo name, and renaming them would break existing users' scripts for nothing
+
+### Upgrade notes
+- **Existing installs must be reinstalled.** `sync-to-user.sh` installs under the new name and does *not* overwrite the old `data-analysis-skill/` directory — leaving it in place means the host sees two copies of the same skill, the stale one never updating again. Remove it manually from whichever of `~/.claude/skills/`, `~/.codex/skills/`, `~/.workbuddy/skills/` you use, then run the sync script
+- Plugin-marketplace users: the plugin name changed, so `/plugin update` will not carry over — reinstall via `/plugin install data-analysis-skills@data-analysis-marketplace`
 
 ---
 
