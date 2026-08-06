@@ -1,0 +1,19 @@
+{
+  "name": "data-analysis-marketplace",
+  "description": "data-analysis-skill 分发市场（仓库自身即市场，含 data-analysis-skill 一个 plugin）。",
+  "owner": {
+    "name": "cabbage2000-lab"
+  },
+  "plugins": [
+    {
+      "name": "data-analysis-skill",
+      "description": "行业化数据分析与叙事报告 skill：给一份数据文件（CSV / Excel / JSON / TSV），先确认行业与受众，再清洗分析，最后交付单文件 HTML 交互式报告——结论先行、每图配解读、处理过程可追溯。统计纪律强制：不杜撰行业基准、相关不当因果、小样本不硬下结论。",
+      "version": "0.17.0",
+      "license": "MIT",
+      "source": "./",
+      "author": {
+        "name": "cabbage2000-lab"
+      }
+    }
+  ]
+}

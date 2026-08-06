@@ -29,14 +29,14 @@ Triage rule: the user names a specific statistical computation and does not ask 
 
 ## The Five-Phase Workflow
 
-At kickoff, immediately use the task-list tool (TodoWrite in Claude Code, update_plan in Codex) to create one todo per phase, advancing and updating status phase by phase. Phases 2–5 run straight through without interrupting the user with further questions; print a one-line progress note at the start of each phase.
+At kickoff, immediately use the host's task-list tool (TodoWrite in Claude Code, update_plan in Codex, the equivalent plan/todo tool in other hosts) to create one todo per phase, advancing and updating status phase by phase. **If the host offers no such tool, list the five phases as a plain-text checklist up front and restate progress as you go** — phase tracking is never dropped just because the tool is missing. Phases 2–5 run straight through without interrupting the user with further questions; print a one-line progress note at the start of each phase.
 
 ### Phase 1: Data Intake & Understanding [the only mandatory gate]
 
 1. Read the data and report a profile: row/column counts, field types, missingness, time range, distributions of key unique values
 2. **Industry identification**: infer the industry from field names, data characteristics, and the user's description, and self-assess confidence
 3. **Multi-source intake (when the input carries >1 dataset)**: an Excel file with several sheets, two or more files handed over at once, or a JSON whose top level is a dict with multiple array keys each count as multiple datasets. **Enumerate every source** (all sheet names / all files / all top-level keys), surface the full list to the user, and load `references/data-sources.md` for the read patterns and relation matrix. **Never silently read only the first sheet / the named file / collapse JSON keys** — that produces a report the user cannot tell is incomplete
-4. **User confirmation (mandatory gate)**: ask via structured multiple-choice questions (use AskUserQuestion in Claude Code; if the environment lacks that tool, ask as numbered multiple-choice questions in plain text and **wait for the user's reply before continuing**). Bundle into the first round:
+4. **User confirmation (mandatory gate)**: ask via structured multiple-choice questions — use the host's structured-questioning tool when it has one (e.g. AskUserQuestion in Claude Code); when the host has none, the tool is unavailable, or the user declines it, ask as numbered multiple-choice questions in plain text and **wait for the user's reply before continuing**. Only the presentation degrades — the gate itself never does. Bundle into the first round:
    - Industry confirmation (high confidence → a single confirm option; low confidence or anonymized fields → offer 3–4 industry options, **never guess on your own**)
    - Analysis goal (when the user hasn't made clear what they want to see)
    - Report audience (executives = conclusion-led, light on jargon / analysts = keep the technical detail)
@@ -126,7 +126,8 @@ Industry templates are a thin layer: they change analysis focus and narrative st
 | Data quality too poor | Diagnostic report + repair suggestions, terminate (see Phase 2) |
 | Sample too small for statistical testing | Descriptive analysis + statistical-power caveat |
 | Goal still unclear after 3 rounds of questions | Produce a standard EDA report from data characteristics, declaring assumptions upfront |
-| Environment cannot interact (e.g. `codex exec` / `claude -p` non-interactive modes) | Treat as "goal still unclear after 3 rounds": standard EDA report + general industry fallback + assumptions declared upfront |
+| Environment cannot interact (any non-interactive mode, e.g. `codex exec` / `claude -p`) | Treat as "goal still unclear after 3 rounds": standard EDA report + general industry fallback + assumptions declared upfront |
+| Host lacks a task-list tool or a structured-questioning tool | Degrade the presentation only — plain-text phase checklist / numbered plain-text multiple-choice, then wait for the reply. The Phase 1 gate and the five-phase workflow stay intact |
 | Low confidence in industry identification | Offer 3–4 industry options; don't guess |
 | Industry identifiable but no template | general.md + industry terminology injected into the narrative |
 | User rejects the identification without naming an industry | general.md, industry-neutral narrative |

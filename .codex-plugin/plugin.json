@@ -1,0 +1,39 @@
+{
+  "name": "data-analysis-skill",
+  "description": "行业化数据分析与叙事报告 skill：给一份数据文件（CSV / Excel / JSON / TSV），先确认行业与受众，再清洗分析，最后交付单文件 HTML 交互式报告——结论先行、每图配解读、处理过程可追溯。统计纪律强制：不杜撰行业基准、相关不当因果、小样本不硬下结论。",
+  "version": "0.17.0",
+  "license": "MIT",
+  "homepage": "https://github.com/cabbage2000-lab/data-analysis-skill",
+  "repository": "https://github.com/cabbage2000-lab/data-analysis-skill.git",
+  "author": {
+    "name": "cabbage2000-lab"
+  },
+  "keywords": [
+    "skills",
+    "data-analysis",
+    "data-visualization",
+    "echarts",
+    "business-intelligence",
+    "reporting",
+    "chinese"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "data-analysis-skill 行业化数据分析",
+    "shortDescription": "把数据文件变成会讲故事的单文件 HTML 分析报告",
+    "longDescription": "面向业务与运营场景的行业化数据分析 skill：接过 CSV / Excel / JSON / TSV 数据（含 Excel 多 sheet、多文件、多结构 JSON），先与你确认行业、分析目标与报告受众，再完成清洗、指标计算与深入分析，最终交付单文件 HTML 交互式报告——固定六段式、结论先行、每张图配解读、数据处理过程写入附录可追溯。覆盖零售电商、互联网 SaaS、自媒体、企业财务 FP&A、基金、房地产、建筑、教育培训 8 个行业模版，其余行业走通用视角兜底；A/B 测试、时间序列预测、因果推断、机器学习按需启用方法模块。统计纪律强制：不杜撰行业基准、未经因果验证不用因果话术、小样本明示统计效力限制、多数据集绝不静默只读第一个 sheet。",
+    "developerName": "cabbage2000-lab",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "帮我分析这份销售数据，给我一份报告",
+      "帮我看看 A/B 实验里 B 方案是不是真的更好",
+      "这份预算执行表帮我做个经营分析"
+    ],
+    "websiteURL": "https://github.com/cabbage2000-lab/data-analysis-skill"
+  }
+}
