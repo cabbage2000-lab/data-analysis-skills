@@ -37,6 +37,13 @@
         与负向语义、数据蓝 #006ba6 为第一系列色与正向语义，全无衬线、数字 tabular-nums），
         并向 ECharts 注册 economist 主题统一兜底色板与字体；option 自带配置仍优先于主题，
         option 不必指定 color（语义色除外）。
+        系列色板经色彩科学校验（色盲安全 CVD ΔE、OKLCH 亮度带/色度下限、白面对比度≥3:1；
+        校验器 workspace/validate_palette.py，源自 Claude Code dataviz skill）——
+        改任何系列色 hex 须重跑 validate_template.py（内含调色板断言），不得目测定色。
+        标记规格（mark specs，同源 dataviz）由模板兜底：2px 线宽、8px 实心点带 2px 白环、
+        柱宽上限 24px、堆叠段/饼段间 2px 白缝、面积填充 12% 洗色、>50 点折线自动隐藏点标记、
+        visualMap 未设 inRange 时兜底数据蓝单色 ramp（ECharts 默认彩虹带违反数值渐变纪律）；
+        option 无需（也不应）重复设置这些样式——option 显式设置时仍以 option 优先。
 -->
 <head>
 <meta charset="UTF-8">
@@ -640,12 +647,14 @@ window.__REPORT_DATA__ = __REPORT_DATA_JSON__;
   function renderCharts() {
     if (!window.echarts) { setTimeout(renderCharts, 300); return; }  // 等待备源加载
     // economist 主题：「红印·出版」同源色板；option 自带配置优先于主题
+    // 系列色经色彩科学校验（workspace/validate_palette.py，OKLCH 亮度带/色度下限/
+    // Machado CVD 分离/对比度≥3:1 全过，white 表面）——改动任何 hex 须重跑该校验
     const FONT = '-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
     const AXIS = { axisLine: { lineStyle: { color: '#121212' } }, axisTick: { lineStyle: { color: '#c9c9c9' } },
                    axisLabel: { color: '#6b6b6b' }, splitLine: { lineStyle: { color: '#e3e3e3' } },
                    nameTextStyle: { color: '#9a9a9a' } };
     echarts.registerTheme('economist', {
-      color: ['#006ba6', '#3ebcd2', '#e3120b', '#f6a44c', '#76c0c1', '#963c4c', '#1d3956', '#b5b5b5'],
+      color: ['#006ba6', '#11a2b8', '#e3120b', '#d18221', '#189fa2', '#963c4c', '#20578d', '#a5762e'],
       backgroundColor: 'transparent',
       textStyle: { fontFamily: FONT, color: '#6b6b6b' },
       categoryAxis: AXIS, valueAxis: AXIS, timeAxis: AXIS, logAxis: AXIS,
@@ -658,12 +667,38 @@ window.__REPORT_DATA__ = __REPORT_DATA_JSON__;
       dataZoom: { borderColor: '#c9c9c9', fillerColor: 'rgba(0,107,166,0.08)',
                   handleStyle: { color: '#006ba6' }, textStyle: { color: '#9a9a9a' } },
       visualMap: { textStyle: { color: '#6b6b6b' } },
+      // mark specs（源自 dataviz skill）：2px 细线 + 8px 实心点标记；点/柱段/饼段一律以
+      // 2px 纸面白描边做分隔（surface gap/ring）——重叠与堆叠靠白缝区分，不靠深色描边
+      line: { symbol: 'circle', symbolSize: 8, lineStyle: { width: 2 },
+              itemStyle: { borderColor: '#ffffff', borderWidth: 2 } },
+      bar: { itemStyle: { borderColor: '#ffffff', borderWidth: 2 } },
+      pie: { itemStyle: { borderColor: '#ffffff', borderWidth: 2 } },
+      scatter: { itemStyle: { borderColor: '#ffffff', borderWidth: 2 } },
     });
+    // mark specs 兜底（布局属性主题不生效，setOption 前补；option 已显式设置的一律不碰）
+    const LINE_SYMBOL_MAX = 50;   // 折线超过 50 点不画点标记（hover 强调时仍显示）
+    // 数值渐变单色 ramp（数据蓝同色相浅→深，OKLCH 等距校验过）：ECharts visualMap
+    // 默认色带是彩虹系，违反「数值 = 单色相亮度渐变」纪律，未显式设 inRange 时以此兜底
+    const SEQ_RAMP = ['#d5ebfe', '#91c1e8', '#5196ca', '#016ca7', '#034c77'];
+    function applyMarkSpecs(option) {
+      const list = Array.isArray(option.series) ? option.series : (option.series ? [option.series] : []);
+      list.forEach(s => {
+        if (s.type === 'bar' && s.barMaxWidth == null) s.barMaxWidth = 24;   // 柱不填满槽位，留呼吸感
+        if (s.type === 'line') {
+          if (s.showSymbol == null && (s.data || []).length > LINE_SYMBOL_MAX) s.showSymbol = false;
+          if (s.areaStyle && typeof s.areaStyle === 'object' && s.areaStyle.opacity == null)
+            s.areaStyle.opacity = 0.12;   // 面积是洗色不是色块，不得盖住网格
+        }
+      });
+      const vms = Array.isArray(option.visualMap) ? option.visualMap : (option.visualMap ? [option.visualMap] : []);
+      vms.forEach(v => { if (v.inRange == null) v.inRange = { color: SEQ_RAMP }; });
+      return option;
+    }
     const instances = chartJobs.map(ch => {
       const el = document.getElementById(ch.id);
       if (!el || !ch.option) return null;
       const inst = echarts.init(el, 'economist');
-      inst.setOption(ch.option);
+      inst.setOption(applyMarkSpecs(ch.option));
       return inst;
     }).filter(Boolean);
     window.addEventListener('resize', () => instances.forEach(i => i.resize()));

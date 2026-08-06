@@ -1,7 +1,7 @@
 {
   "name": "data-analysis-skills",
   "description": "行业化数据分析与叙事报告 skill：给一份数据文件（CSV / Excel / JSON / TSV），先确认行业与受众，再清洗分析，最后交付单文件 HTML 交互式报告——结论先行、每图配解读、处理过程可追溯。统计纪律强制：不杜撰行业基准、相关不当因果、小样本不硬下结论。",
-  "version": "0.18.0",
+  "version": "0.18.1",
   "license": "MIT",
   "homepage": "https://github.com/cabbage2000-lab/data-analysis-skills",
   "repository": "https://github.com/cabbage2000-lab/data-analysis-skills.git",

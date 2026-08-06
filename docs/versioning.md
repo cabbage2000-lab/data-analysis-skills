@@ -84,13 +84,23 @@ v0.17 (2026-08-06)
  │  五阶段流程 / 统计纪律 / 模板契约均未动
  │
  ▼
-v0.18 (2026-08-06, 当前)
+v0.18 (2026-08-06)
  │  项目与 skill 重命名 data-analysis-skill → data-analysis-skills
  │  （仓库名 / 项目目录 / skill 身份三者对齐，同 v0.14 性质）
  │  + 顺带修四处随改名失效的引用（断链 symlink / evals 15 处绝对路径 /
  │    validate_template.py 硬编码路径 / settings.local.json 7 处权限路径）
  │  五阶段流程 / 门禁 / 统计纪律 / 模板契约均未动
  │  ⚠️ 老用户须重装：旧名目录不会被覆盖，需人工清理
+ │
+ ▼
+v0.18.1 (2026-08-06, 当前)
+ │  dataviz skill 借鉴（P0–P2）：模板系列色保色相 re-step 过色彩科学校验
+ │  （CVD 色盲分离 / OKLCH 亮度带 / 对比度≥3:1，validate_palette.py 入门禁）
+ │  + mark specs 模板兜底（细线 8px 点白环 / 柱宽上限 / 堆叠白缝 / 面积洗色 /
+ │    visualMap 反彩虹单色 ramp）
+ │  + visualization.md：是否需要图表 / Emphasis 高亮 / 系列数·标注·图例纪律 /
+ │    反模式清单（Pareto 为双轴唯一豁免）
+ │  PATCH（同 v0.16.1 性质：纪律收紧 + 模板增强，无新模块/契约/流程变更）
  │
  ▼
 v0.19

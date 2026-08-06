@@ -25,3 +25,4 @@ skills/data-analysis-workspace/
 # sync-to-user.sh 自 v0.17 起纳入版本控制：它已是三宿主（Claude Code / Codex /
 # WorkBuddy）通用安装脚本，README 的安装方式 C 依赖它——不入库则 clone 后无脚本可跑。
 .superpowers/
+.playwright-mcp
