@@ -170,6 +170,37 @@
         "HTML 中 ECharts 依赖通过带固定版本号的 CDN URL 引入",
         "每张图表配有解读文字"
       ]
+    },
+    {
+      "id": 13,
+      "name": "timeseries-forecast-validation",
+      "maps_to": "需求§13-T13：时间序列预测（STL/ADF/定阶/样本外回测/区间预测）",
+      "prompt": "这是我们过去四年的月度销售额数据：/Users/blingabc/PycharmProjects/data-analysis-skill/skills/data-analysis-workspace/test-data/timeseries_monthly_sales.csv。帮我分析销售的趋势和季节性，并预测未来 6 个月的走势，最后给我一份 HTML 报告。",
+      "expected_output": "识别为单变量月度时间序列：做 STL 分解（趋势/季节/残差，分解图入报告）与 ADF 平稳性检验；给出模型定阶依据（ACF/PACF 或 AIC/BIC 或 auto_arima）；预测前做样本外回测（留出最后若干月或 walk-forward）并报告 MAPE/MAE；最终预测带 95% 置信区间且 horizon≤历史 1/4；单文件六段式 HTML 报告、结论先行、ECharts 固定版本 CDN",
+      "files": ["timeseries_monthly_sales.csv"],
+      "assertions": [
+        "做 STL 分解（趋势/季节/残差）并将分解结果或分解图纳入报告",
+        "做 ADF 平稳性检验并据此说明是否差分",
+        "给出模型定阶/选型依据（ACF/PACF 或 AIC/BIC 或 auto_arima），而非无依据地直接选定模型",
+        "在产出最终预测前做样本外回测（留出验证或 walk-forward）并报告 MAPE/MAE 等样本外精度",
+        "最终预测带 95% 置信区间（非点估计），预测 horizon 不超过历史长度的 1/4",
+        "产出单个六段式 HTML 报告，开篇结论先行，ECharts 经固定版本 CDN 引入"
+      ]
+    },
+    {
+      "id": 14,
+      "name": "ml-leakage-imbalance",
+      "maps_to": "需求§13-T14：机器学习（泄漏自检/类别不平衡/baseline lift）",
+      "prompt": "这是我们的用户数据：/Users/blingabc/PycharmProjects/data-analysis-skill/skills/data-analysis-workspace/test-data/churn_users.csv。帮我建个模型预测哪些用户会流失，并告诉我哪些因素和流失最相关。最后给我一份 HTML 报告。",
+      "expected_output": "建立流失分类模型前自检并移除特征泄漏列（account_status 直接等价标签、last_login_days_ago 为事后特征），并在处理说明记录；正样本约 13%（类别不平衡）→ 不以 accuracy 为主指标，改报 precision/recall/F1/AUC 并说明业务更关心哪类错误；报告对多数类 naive baseline 的 lift；声明训练/测试划分；特征重要性用『对模型判别贡献最大』措辞而非因果断言；单文件六段式 HTML 报告",
+      "files": ["churn_users.csv"],
+      "assertions": [
+        "自检并移除特征泄漏列（account_status 与 last_login_days_ago 均应被识别为泄漏/事后特征并剔除），并在数据处理说明中记录",
+        "识别正样本占比<20%（类别不平衡），未以 accuracy 为主指标，改报 precision/recall/F1/AUC，并说明业务更关心哪类错误",
+        "报告模型相对多数类 naive baseline 的 lift（否则指标无参照）",
+        "声明训练/测试划分（比例、是否分层）；特征重要性用『对判别贡献最大』而非『X 导致流失』的因果话术",
+        "产出单个六段式 HTML 报告，开篇结论先行，ECharts 经固定版本 CDN 引入"
+      ]
     }
   ]
 }

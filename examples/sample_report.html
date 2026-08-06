@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<!--
+  data-analysis-skill 报告模板
+  ============================
+  使用方式（Python 端）：
+    把正文 script 中 window.__REPORT_DATA__ 赋值行右侧的数据占位符（REPORT_DATA_JSON，两侧各两条下划线，
+    全模板仅该一处字面量）replace 为 json.dumps(report_data, ensure_ascii=False) 的结果。
+  输出为单文件 HTML，依赖经 CDN 引入（固定版本），需联网打开。
+
+  数据契约 report_data（叙事文本的 Markdown 支持分两级：
+    · narrative 字段（background / data_overview / sections[] / conclusions 四处）：块级 Markdown
+      —— 空行分段、`### ` 小标题、`- ` 无序列表、`1. ` 有序列表、**加粗**；
+    · 其余叙事字段（headline/detail/objectives/insight/quality_summary/recommendations/notes 等）：仅 **加粗** 与换行）：
+  {
+    "meta":         {"title", "subtitle", "date", "industry_label", "audience", "lang"},
+    "key_findings": [{"headline", "detail", "type": "positive|negative|warning|neutral"}],   // 3-5 条
+    "background":   {"narrative", "objectives": ["..."]},
+    "data_overview":{"narrative", "stats": [{"label","value","note"}], "quality_summary"},
+    "sections":     [{"id","title","narrative",
+                      "charts":[{"id","title","question","option":{ECharts option，纯 JSON 无函数},
+                                 "insight","height"}],
+                      "tables":[{"title","columns":["..."],"rows":[["..."]]}]}],   // rows 为展示格式字符串（"¥1,200,000"）
+    "conclusions":  {"narrative","recommendations":[{"title","detail","priority":"高|中|低"}]},
+    "appendix":     {"processing_notes":["..."],"methods_notes":["..."]}
+  }
+  多数据集承载（契约字段不变，靠内容承载，见 references/data-sources.md）：
+    · 融合模式（多源 join/concat 成一张表，最常见）—— data_overview.narrative 说明来源与关联键
+      （如「本报告基于 N 个数据源：订单(800行)+客户(120行)+商品(40行)，按 customer_id/product_id 关联」），
+      appendix.processing_notes 记录关联键与丢失行数；其余按单数据集流程走。
+    · 分源模式（各源独立分析）—— sections 天然承载，每个 section 讲一个源（title 标注源名）。
+  约束：option 必须是纯 JSON（formatter 等用 ECharts 字符串模板如 '{b}: {c}'，不可用函数）。
+  约束（表格）：≤20 行渲染静态出版表；>20 行自动切换 Grid.js 交互表（分页/搜索/排序，数字列按解析值排序），
+      同一 tables 结构、无需任何标记字段；单表上限 500 行，超出须在注入前截断为 TOP-N 并在
+      appendix.processing_notes 注明（模板不做静默截断）。
+  视觉：「红印·出版」编辑风（经济学人式：白纸面 + 顶部红条，经济学人红 #e3120b 承担版面强调
+        与负向语义、数据蓝 #006ba6 为第一系列色与正向语义，全无衬线、数字 tabular-nums），
+        并向 ECharts 注册 economist 主题统一兜底色板与字体；option 自带配置仍优先于主题，
+        option 不必指定 color（语义色除外）。
+-->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据分析报告</title>
+<!-- Tailwind Play CDN + typography 插件（均锁版，实测 2026-06-12：200/543KB；plugins 不带 @版本 会 302 至 latest，禁止）：
+     typography 承载 narrative 块级排版，主视觉仍由下方自定义 CSS 独立承载 -->
+<script src="https://cdn.tailwindcss.com/3.4.16?plugins=typography@0.5.16"></script>
+<!-- ECharts 5.4.3：主源 bootcdn（国内），失败回退 unpkg（实测 2026-06 均可达）-->
+<script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+<script>window.echarts || document.write('<script src="https://unpkg.com/echarts@5.4.3/dist/echarts.min.js"><\/script>')</script>
+<!-- Grid.js 6.2.0（>20 行表格自动交互化）：主源 bootcdn，JS 失败回退 unpkg（实测 2026-06 均可达）；
+     主题 CSS 须先于下方自定义 <style>（覆盖块同特异度后序取胜），用 link onerror 回退备源
+     （CSS 无全局变量可同步探测，不能套用 document.write 模式） -->
+<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/gridjs/6.2.0/theme/mermaid.min.css"
+      onerror="this.onerror=null;this.href='https://unpkg.com/gridjs@6.2.0/dist/theme/mermaid.min.css'">
+<script src="https://cdn.bootcdn.net/ajax/libs/gridjs/6.2.0/gridjs.umd.js"></script>
+<script>window.gridjs || document.write('<script src="https://unpkg.com/gridjs@6.2.0/dist/gridjs.umd.js"><\/script>')</script>
+<style>
+  /* ============ 「红印·出版」设计系统（经济学人风：白纸面、红顶条、红/蓝双强调） ============ */
+  :root {
+    --ink: #121212;          /* 墨黑：标题/重数字 */
+    --ink-2: #404040;        /* 正文 */
+    --muted: #6b6b6b;        /* 次要/轴标签/表头 */
+    --faint: #9a9a9a;        /* 弱化/图号/label */
+    --line: #e5e5e5;         /* 浅分隔线 */
+    --line-2: #c9c9c9;       /* 中分隔线（表头底线） */
+    --grid: #e3e3e3;         /* 图表横网格 */
+    --soft: #f7f7f5;         /* 浅灰底（质量说明/附录/hover） */
+    --accent: #e3120b;       /* 经济学人红：版面强调/负向语义 */
+    --blue: #006ba6;         /* 数据蓝：第一系列色/正向语义 */
+    --blue-soft: #f0f7fb;
+    --blue-line: #b3d4e4;
+    --amber: #b45309;        /* 警示琥珀（文字） */
+    --amber-line: #ecd1ae;
+    --amber-soft: #fdf6ec;
+    --red-line: #f3b8b5;
+    --red-soft: #fdf1f0;
+    --paper: #ffffff;
+    --paper-edge: #e8e6e1;
+
+    /* 纯系统字体栈：内网/离线打开也保证排版稳定 */
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans SC", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth;
+         background: radial-gradient(120% 80% at 50% -10%, #f7f6f3 0%, #f2f1ed 55%, #edebe6 100%);
+         background-attachment: fixed; }
+  body { margin: 0; color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.75;
+         -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  a { color: var(--accent); text-decoration: none; }
+  h1, h2, h3 { line-height: 1.3; margin: 0; }
+  p { margin: 0; }
+
+  /* ---------- 布局：桌面上的纸张 + 旁置目录（自管响应式） ---------- */
+  .fallback-wrap { max-width: 1240px; margin: 0 auto; padding: 0 20px; }
+  #toc-nav { display: none; }
+  @media (min-width: 1100px) {
+    .fallback-wrap { display: flex; gap: 44px; align-items: flex-start; }
+    #toc-nav { display: block; width: 192px; flex-shrink: 0; }
+    .report-main { flex: 1; min-width: 0; }
+  }
+  /* 纸张 */
+  .page { position: relative; background: var(--paper); border: 1px solid var(--paper-edge);
+          border-top: 6px solid var(--accent);
+          margin: 34px 0 56px; padding: 52px 60px 48px;
+          box-shadow: 0 1px 0 rgba(255,255,255,.7) inset,
+                      0 20px 50px -22px rgba(40,35,30,.25),
+                      0 2px 8px rgba(40,35,30,.06); }
+
+  /* ---------- 目录（桌面旁置便签） ---------- */
+  #toc-nav .toc-inner { position: sticky; top: 36px; padding-top: 102px; }
+  .toc-label { font-size: 11.5px; font-weight: 800; letter-spacing: .24em;
+               text-transform: uppercase; color: var(--accent); margin: 0 0 10px;
+               border-top: 3px solid var(--ink);
+               border-bottom: 1px solid var(--line-2); padding: 9px 0; }
+  #toc-list { list-style: none; margin: 0; padding: 0; font-size: 13.5px; }
+  #toc-list a { display: flex; gap: 9px; align-items: baseline; padding: 6px 0 6px 11px;
+                color: var(--ink-2); font-weight: 700;
+                text-decoration: none; border-left: 3px solid transparent; margin-left: -12px;
+                transition: color .25s, border-color .25s; }
+  #toc-list a:hover { color: var(--ink); border-left-color: var(--line-2); }
+  #toc-list a.active { color: var(--accent); border-left-color: var(--accent); }
+  #toc-list .toc-no { font-size: 11.5px; font-weight: 700;
+                      color: var(--faint); min-width: 16px; font-feature-settings: "tnum" 1; }
+  #toc-list a.active .toc-no { color: var(--accent); }
+
+  /* ---------- 报头 ---------- */
+  .masthead { padding-bottom: 0; margin-bottom: 46px; }
+  .masthead-kicker { margin: 0 0 12px; font-size: 12px; font-weight: 700;
+                     letter-spacing: .24em; text-transform: uppercase; color: var(--accent); }
+  .masthead h1 { font-size: clamp(28px, 3.4vw, 36px); line-height: 1.22; font-weight: 850;
+                 letter-spacing: .01em; color: var(--ink); }
+  #r-subtitle { margin: 9px 0 0; max-width: 60ch; color: #5f5f5f; font-size: 15px; line-height: 1.66; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 6px 26px; list-style: none;
+              margin: 18px 0 0; padding: 10px 0;
+              border-top: 1.5px solid var(--ink); border-bottom: 1px solid var(--line); }
+  .meta-row li { display: inline-flex; align-items: baseline; gap: 7px; }
+  .c-label { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); }
+  .c-value { font-size: 13.5px; color: var(--ink); font-weight: 600; font-feature-settings: "tnum" 1; }
+
+  /* ---------- 章节头（红方块 + 红序号 + 黑标题，无右伸线） ---------- */
+  section { margin-bottom: 56px; }
+  .section-head { display: flex; align-items: baseline; gap: 10px; margin: 0 0 18px; }
+  .section-head::before { content: ""; width: 9px; height: 9px; background: var(--accent);
+                          flex-shrink: 0; align-self: center; }
+  .section-index { font-size: 13.5px; font-weight: 800; color: var(--accent);
+                   font-feature-settings: "tnum" 1; }
+  .section-title { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: .02em;
+                   color: var(--ink); white-space: nowrap; }
+
+  .narrative { color: var(--ink-2); }
+  /* 叙事排版：typography 插件 prose 映射「红印」。Play CDN 样式注入 head 末尾（晚于本表），
+     且插件 .prose 规则自身定义同名 --tw-prose-* 变量——故覆盖一律用 .narrative.prose（0,2,0）。 */
+  .narrative.prose {
+    max-width: 705px;            /* 压过插件 65ch */
+    font-size: inherit;          /* 屏 15px / 印 12.5px 跟随 body，压过插件 1rem */
+    line-height: inherit;        /* 1.78 / 1.6，压过插件 1.75 */
+    --tw-prose-body: var(--ink-2);
+    --tw-prose-headings: var(--ink);
+    --tw-prose-lead: var(--ink-2);
+    --tw-prose-links: var(--accent);
+    --tw-prose-bold: var(--accent);
+    --tw-prose-counters: var(--accent);
+    --tw-prose-bullets: var(--accent);
+    --tw-prose-hr: var(--line);
+    --tw-prose-quotes: var(--ink);
+    --tw-prose-quote-borders: var(--accent);
+    --tw-prose-captions: var(--muted);
+    --tw-prose-code: var(--ink);
+    --tw-prose-th-borders: var(--line-2);
+    --tw-prose-td-borders: var(--line);
+  }
+  .narrative.prose ul { list-style-type: square; }   /* 与 .objectives 方块 bullet 同语言 */
+  .narrative.prose h4 { font-weight: 800; font-size: 15px; letter-spacing: .02em;
+                        break-after: avoid; page-break-after: avoid; }
+  .narrative strong, .prose strong { color: var(--accent); font-feature-settings: "tnum" 1; }
+
+  /* ---------- 核心发现：头版要闻（描边胶囊语义标签，编号统一红色） ---------- */
+  .finding { display: flex; gap: 14px; padding: 15px 2px; border-bottom: 1px solid var(--line); }
+  .finding:first-child { padding-top: 4px; }
+  .finding-no { font-size: 16px; line-height: 1.55; min-width: 28px; font-weight: 800;
+                color: var(--accent); font-feature-settings: "tnum" 1; }
+  .finding-body { flex: 1; }
+  .finding-head { font-size: 16px; font-weight: 700; line-height: 1.55; color: var(--ink); }
+  .finding-head strong { color: var(--accent); font-feature-settings: "tnum" 1; }
+  .finding-detail { font-size: 14px; color: var(--muted); margin-top: 5px; max-width: 56em; line-height: 1.65; }
+  .finding-tag { font-size: 11.5px; font-weight: 700; letter-spacing: .06em; padding: 2px 10px;
+                 border-radius: 2px; align-self: flex-start; margin-top: 5px; white-space: nowrap; }
+  .t-positive { color: var(--blue);   border: 1px solid var(--blue-line);  background: var(--blue-soft); }
+  .t-negative { color: var(--accent); border: 1px solid var(--red-line);   background: var(--red-soft); }
+  .t-warning  { color: var(--amber);  border: 1px solid var(--amber-line); background: var(--amber-soft); }
+  .t-neutral  { color: var(--muted);  border: 1px solid var(--line-2);     background: var(--soft); }
+  /* JS 给编号也挂了语义类，覆盖规则确保编号统一红色、无边框无底色（级联顺序须在语义类之后） */
+  .finding-no.t-positive, .finding-no.t-negative, .finding-no.t-warning, .finding-no.t-neutral {
+    color: var(--accent); border: none; background: transparent; }
+  @media (max-width: 639px) {
+    .finding { gap: 13px; }
+    .finding-no { font-size: 15px; min-width: 24px; }
+    .finding-tag { display: none; }   /* 窄屏下语义已由编号颜色表达 */
+  }
+
+  /* ---------- 目标列表（正方块 bullet） ---------- */
+  .objectives { margin: 16px 0 0; padding: 0; list-style: none; max-width: 705px; }
+  .objectives li { position: relative; margin: 6px 0; padding-left: 17px; color: var(--ink-2); }
+  .objectives li::before { content: ""; position: absolute; left: 1px; top: .62em; width: 7px; height: 7px;
+                           background: var(--accent); }
+
+  /* ---------- 数据概况 ---------- */
+  #ov-stats { display: grid; grid-template-columns: repeat(2, 1fr); border-top: 2px solid var(--ink); margin: 22px 0; }
+  @media (min-width: 720px) { #ov-stats { grid-template-columns: repeat(4, 1fr); } }
+  .stat { padding: 14px 18px 12px 15px; border-bottom: 1px solid var(--line); border-left: 1px solid var(--line); }
+  .stat:nth-child(2n+1) { border-left: none; }
+  @media (min-width: 720px) { .stat:nth-child(2n+1) { border-left: 1px solid var(--line); } .stat:nth-child(4n+1) { border-left: none; } }
+  .stat-label { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); }
+  .stat-value { font-size: 29px; font-weight: 800; color: var(--ink); margin-top: 5px; line-height: 1.16;
+                letter-spacing: .01em; font-feature-settings: "tnum" 1; }
+  .stat-note { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .quality-note { margin: 0; padding: 11px 16px; border-left: 3px solid var(--accent); background: var(--soft);
+                  color: var(--ink-2); font-size: 14px; line-height: 1.7; border-radius: 0; max-width: 705px; }
+  .quality-note .q-label { color: var(--ink-2); font-weight: 700; margin-right: 8px; }
+  .quality-note strong { color: var(--ink-2); }
+
+  /* ---------- 图表（红块图题 + 无框图区） ---------- */
+  .figure { margin: 30px 0 38px; }
+  .figure-mark { width: 36px; height: 4px; background: var(--accent); margin-bottom: 8px; }
+  .figure-title { font-size: 16px; font-weight: 800; letter-spacing: .01em; color: var(--ink); }
+  .figure-sub { display: flex; justify-content: space-between; gap: 12px; margin-top: 4px;
+                font-size: 12.5px; color: var(--faint); }
+  .figure-no { white-space: nowrap; font-feature-settings: "tnum" 1; }
+  .chart-box { width: 100%; background: transparent; border: none; margin-top: 10px; }
+  .figure-insight { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line);
+                    font-size: 14.5px; color: var(--ink-2); line-height: 1.7; max-width: 705px; }
+  .insight-label { font-size: 11.5px; font-weight: 800; letter-spacing: .22em; color: var(--accent); margin-right: 9px; }
+  .figure-insight strong { color: var(--accent); font-feature-settings: "tnum" 1; }
+
+  /* ---------- 表格（红块表题 + 出版表线；类名避开 Tailwind 工具类 table-caption） ---------- */
+  .table-block { margin: 30px 0 38px; overflow-x: auto; }
+  .tbl-title { font-size: 16px; font-weight: 800; letter-spacing: .01em; color: var(--ink); }
+  .tbl-sub { display: flex; justify-content: flex-end; margin-top: 4px;
+             font-size: 11.5px; color: var(--faint); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; margin-top: 10px; }
+  thead th { text-align: left; font-weight: 600; font-size: 11.5px; letter-spacing: .14em;
+             text-transform: uppercase; color: var(--muted);
+             border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line-2);
+             padding: 8px 14px 8px 2px; white-space: nowrap; }
+  tbody td { border-bottom: 1px solid var(--line); padding: 8px 14px 8px 2px; color: var(--ink-2); }
+  tbody tr:hover td { background: var(--soft); }
+  tbody td:first-child { color: var(--ink); font-weight: 600; }
+  th.num, td.num { text-align: right; font-feature-settings: "tnum" 1; font-variant-numeric: tabular-nums; }
+
+  /* ---------- Grid.js 交互表（>20 行自动启用）：mermaid 主题覆盖为「红印·出版」同观感 ----------
+     本 <style> 晚于 mermaid <link>，类选择器同特异度后序取胜；th/td 与上方静态表逐项同值。
+     全局 table { margin-top:10px } 等裸元素选择器会命中 .gridjs-table，需显式归零。 */
+  .gridjs-container { display: block; padding: 0; color: inherit; width: 100%; }
+  .gridjs-wrapper { border: none; border-radius: 0; box-shadow: none; }
+  .gridjs-table { margin-top: 0; }
+  th.gridjs-th { background: transparent; border: none; border-top: 2px solid var(--ink);
+                 border-bottom: 1px solid var(--line-2); padding: 8px 14px 8px 2px;
+                 color: var(--muted); font-size: 11.5px; font-weight: 600;
+                 letter-spacing: .14em; text-transform: uppercase; }
+  th.gridjs-th-sort { padding-right: 22px; }   /* 给排序箭头留位 */
+  td.gridjs-td { background: transparent; border: none; border-bottom: 1px solid var(--line);
+                 padding: 8px 14px 8px 2px; color: var(--ink-2); font-size: 14px; }
+  .gridjs-tr:hover td.gridjs-td { background: var(--soft); }
+  td.gridjs-td:first-child { color: var(--ink); font-weight: 600; }
+  /* 数字列：列级 attributes 只注 data-num 属性（注 class/style 会覆盖 autoWidth 列宽，禁止） */
+  th.gridjs-th[data-num] .gridjs-th-content { float: right; text-align: right; }
+  td.gridjs-td[data-num] { text-align: right; font-feature-settings: "tnum" 1; font-variant-numeric: tabular-nums; }
+  .gridjs-head { padding: 0; margin-bottom: 8px; }
+  input.gridjs-input { border-radius: 0; border: 1px solid var(--line-2); background: var(--paper);
+                       font-family: inherit; font-size: 13.5px; padding: 7px 12px; }
+  input.gridjs-input:focus { border-color: var(--accent); box-shadow: none; outline: none; }
+  .gridjs-footer { background: transparent; border: none; border-radius: 0; box-shadow: none; padding: 10px 0 0; }
+  .gridjs-summary { color: var(--faint); font-size: 12.5px; font-feature-settings: "tnum" 1; }
+  .gridjs-pagination .gridjs-pages button { border-radius: 0; border: 1px solid var(--line-2);
+      background: transparent; color: var(--ink-2); font-size: 13px; padding: 4px 10px; }
+  .gridjs-pagination .gridjs-pages button.gridjs-currentPage {
+      background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+  @media (max-width: 639px) { .gridjs-search-input { width: 100%; } }
+
+  /* ---------- 结论与建议 ---------- */
+  #cc-recommendations { margin-top: 18px; }
+  .rec { display: flex; gap: 14px; padding: 15px 2px; border-top: 1px solid var(--line); align-items: flex-start; }
+  .rec:last-child { border-bottom: 1px solid var(--line); }
+  .rec-prio { font-size: 11.5px; font-weight: 800; letter-spacing: .1em; padding: 3px 12px;
+              border-radius: 2px; flex-shrink: 0; margin-top: 2px; white-space: nowrap; }
+  .p-high { background: var(--accent); color: #fff; }
+  .p-mid  { border: 1px solid var(--amber-line); color: var(--amber); background: var(--amber-soft); }
+  .p-low  { border: 1px solid var(--line-2); color: var(--muted); }
+  .rec-title { font-size: 16px; font-weight: 700; color: var(--ink); }
+  .rec-no { font-weight: 800; color: var(--accent); margin-right: 6px; font-feature-settings: "tnum" 1; }
+  .rec-detail { font-size: 14px; color: var(--muted); margin-top: 4px; max-width: 56em; line-height: 1.65; }
+  .rec-detail strong, .rec-title strong { color: var(--accent); }
+
+  /* ---------- 附录（刊末说明） ---------- */
+  #sec-appendix details { background: var(--soft); border: 1px solid var(--paper-edge); border-radius: 0; padding: 16px 20px; }
+  #sec-appendix summary { cursor: pointer; font-size: 16px; font-weight: 800; letter-spacing: .03em;
+                          color: var(--ink); list-style: none; display: flex; align-items: center; gap: 11px; }
+  #sec-appendix summary::-webkit-details-marker { display: none; }
+  #sec-appendix summary::before { content: "+"; color: var(--accent); font-weight: 800;
+                                  font-size: 17px; line-height: 1; transition: transform .3s; }
+  #sec-appendix details[open] summary::before { transform: rotate(45deg); }
+  .ap-subhead { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--faint); margin: 20px 0 7px; }
+  .ap-list { margin: 0; padding-left: 20px; font-size: 14px; color: var(--ink-2); list-style: decimal; }
+  .ap-list li { padding: 2px 0; }
+  .colophon { text-align: center; font-size: 12px; color: var(--faint); letter-spacing: .06em;
+              border-top: 1px solid var(--line); padding: 14px 0 0; margin-top: 48px; }
+
+  /* ---------- 入场动效（仅屏幕、尊重无障碍偏好） ---------- */
+  @media screen and (prefers-reduced-motion: no-preference) {
+    .masthead > * { animation: rise .6s cubic-bezier(.2, .7, .2, 1) backwards; }
+    .masthead > *:nth-child(4) { animation-delay: .08s; }
+    .reveal { opacity: 0; transform: translateY(9px);
+              transition: opacity .6s cubic-bezier(.2,.7,.2,1), transform .6s cubic-bezier(.2,.7,.2,1); }
+    .reveal.on { opacity: 1; transform: translateY(0); }
+    @keyframes rise { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+  }
+
+  /* ---------- 响应式（窄屏：纸张铺满） ---------- */
+  @media (max-width: 720px) {
+    .fallback-wrap { padding: 0; }
+    .page { margin: 0; padding: 28px 18px 30px; border: none; border-top: 6px solid var(--accent); box-shadow: none; }
+    .section-title { white-space: normal; }
+  }
+
+  /* ---------- 打印：A4、省墨、保留强调 ---------- */
+  @page { size: A4; margin: 12mm; }
+  @media print {
+    html { background: #ffffff; }
+    body { font-size: 13px; line-height: 1.6; }
+    #toc-nav { display: none; }
+    .page { margin: 0; padding: 14px 0 0; border: none; border-top: 6px solid var(--accent);
+            box-shadow: none; background: #ffffff; }
+    .masthead { padding-bottom: 12px; margin-bottom: 32px; }
+    .masthead > * { animation: none; }
+    .reveal { opacity: 1 !important; transform: none !important; transition: none; }
+    section { margin-bottom: 36px; }
+    .section-head { break-after: avoid; page-break-after: avoid; }
+    .figure, .table-block, .finding, .rec, .stat, .quality-note { break-inside: avoid; page-break-inside: avoid; }
+    p, li { orphans: 2; widows: 2; }
+    .finding-tag, .quality-note, .p-mid, #sec-appendix details,
+    .t-positive, .t-negative, .t-warning, .t-neutral { background: #ffffff; }
+    /* 交互表：搜索框/页码不上纸；summary 行保留，纸面明示「共 N 条」存在截断 */
+    .gridjs-search, .gridjs-pagination .gridjs-pages { display: none; }
+    th.gridjs-th, td.gridjs-td, .gridjs-footer { background: #ffffff; }
+    a { color: var(--ink); }
+    .btn-export-pdf { display: none !important; }
+  }
+
+  /* ---------- 导出 PDF 按钮（固定右上角悬浮） ---------- */
+  .btn-export-pdf {
+    position: fixed; top: 16px; right: 24px; z-index: 9999;
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 8px 18px;
+    font: 700 13px/1 var(--sans); letter-spacing: .04em;
+    color: var(--ink); background: var(--paper);
+    border: 1.5px solid var(--line-2); border-radius: 2px;
+    box-shadow: 0 2px 8px rgba(40,35,30,.10);
+    cursor: pointer; transition: all .2s;
+  }
+  .btn-export-pdf:hover { color: var(--accent); border-color: var(--accent); background: #fff8f8;
+                           box-shadow: 0 2px 12px rgba(227,18,11,.12); }
+  .btn-export-pdf:active { transform: scale(.97); }
+  .btn-export-pdf svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; }
+</style>
+</head>
+<body>
+
+<!-- 导出 PDF 按钮（固定右上角，@media print 自动隐藏） -->
+<button class="btn-export-pdf" id="btn-export-pdf" title="打印 / 导出为 PDF 文件">
+  <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+  导出 PDF
+</button>
+
+<div class="fallback-wrap">
+
+  <!-- 目录（桌面端旁置） -->
+  <nav id="toc-nav">
+    <div class="toc-inner">
+      <p class="toc-label">目录 · Contents</p>
+      <ul id="toc-list"></ul>
+    </div>
+  </nav>
+
+  <!-- 主体：桌面上的纸张 -->
+  <main class="report-main page">
+
+    <!-- 报头 -->
+    <header class="masthead">
+      <p class="masthead-kicker">数据分析报告 · Data Analysis Report</p>
+      <h1 id="r-title"></h1>
+      <p id="r-subtitle"></p>
+      <ul class="meta-row" aria-label="报告信息">
+        <li><span class="c-label">日期</span><span class="c-value" id="r-date"></span></li>
+        <li><span class="c-label">行业</span><span class="c-value" id="r-industry"></span></li>
+        <li><span class="c-label">面向</span><span class="c-value" id="r-audience"></span></li>
+      </ul>
+    </header>
+
+    <!-- 1 核心发现 -->
+    <section id="sec-findings" class="reveal">
+      <div class="section-head"><span class="section-index">01</span><h2 class="section-title">核心发现</h2></div>
+      <div id="findings-list"></div>
+    </section>
+
+    <!-- 2 分析背景与目标 -->
+    <section id="sec-background" class="reveal">
+      <div class="section-head"><span class="section-index">02</span><h2 class="section-title">分析背景与目标</h2></div>
+      <div id="bg-narrative" class="narrative prose"></div>
+      <ul id="bg-objectives" class="objectives"></ul>
+    </section>
+
+    <!-- 3 数据概况 -->
+    <section id="sec-overview" class="reveal">
+      <div class="section-head"><span class="section-index">03</span><h2 class="section-title">数据概况</h2></div>
+      <div id="ov-narrative" class="narrative prose"></div>
+      <div id="ov-stats"></div>
+      <p id="ov-quality" class="quality-note"></p>
+    </section>
+
+    <!-- 4 深入分析（动态分节） -->
+    <div id="analysis-sections"></div>
+
+    <!-- 5 结论与建议 -->
+    <section id="sec-conclusions" class="reveal">
+      <div class="section-head"><span class="section-index" id="cc-no">05</span><h2 class="section-title">结论与建议</h2></div>
+      <div id="cc-narrative" class="narrative prose"></div>
+      <div id="cc-recommendations"></div>
+    </section>
+
+    <!-- 6 附录：数据处理说明（默认折叠） -->
+    <section id="sec-appendix" class="reveal">
+      <details>
+        <summary>附录：数据处理说明</summary>
+        <div>
+          <h3 class="ap-subhead">清洗与转换决策记录</h3>
+          <ol id="ap-processing" class="ap-list"></ol>
+          <h3 id="ap-methods-title" class="ap-subhead" style="display:none">方法与假设说明</h3>
+          <ol id="ap-methods" class="ap-list"></ol>
+        </div>
+      </details>
+      <p class="colophon">本报告由 data-analysis-skill 生成 · 图表基于 Apache ECharts · 需联网打开以加载图表组件</p>
+    </section>
+
+  </main>
+</div>
+
+<script>
+window.__REPORT_DATA__ = {"meta": {"title": "SaaS 经营全景分析", "subtitle": "2023年6月至2026年5月，36个月维度的增长引擎、留存健康度、转化漏斗与收入质量全面复盘", "date": "2026-06-10", "industry_label": "SaaS / 订阅业务", "audience": "管理层", "lang": "zh-CN"}, "key_findings": [{"headline": "MRR 累计增长 **14225%**，但近 6 个月增速从 10% 放缓至 **6%**", "detail": "总 MRR 从 26 千元增长至 3681 千元（ARR 442 百万元）。绝对增长仍在继续，但环比增速下降近 4 个百分点，增长引擎正在减速。", "type": "warning"}, {"headline": "NDR 近 6 个月均值跌至 **99.2%**，已跌破 100% 负流失线", "detail": "36 个月中有 19 个月 NDR 低于 100%。前期业务享受负净流失（扩展 > 流失），但近 6 个月均值仅 99.2%（前 6 个月 100.8%），存量客户收入已出现净收缩。这是最需要关注的信号。", "type": "negative"}, {"headline": "流失率近 6 个月均值 **2.5%**，较前 6 个月 **1.6%** 上升 60%", "detail": "流失率从 2025 年下半年开始系统性抬升，从 ~1.5% 区间升至 ~2.5%–3.4% 区间。绝对流失金额随规模扩大而增长，但流失率的上升说明问题不仅是基数效应——客户留存正在恶化。", "type": "negative"}, {"headline": "Quick Ratio 从前期均值 **7.3** 骤降至近 6 个月 **3.8**，逼近 2.0 承压线", "detail": "Quick Ratio 最近 3 个月分别为 3.5、2.6、2.5，下降趋势陡峭。若按当前趋势外推，2–3 个月内可能触及 2.0 承压线。增长效率正在快速恶化。", "type": "negative"}, {"headline": "扩展收入占比达 **19%**，但扩展速度不足以对冲加速流失", "detail": "累计扩展 MRR 占总流入的 19%，说明产品对存量客户有持续价值渗透能力。但近期流失加速已超过扩展能力，导致 NDR 跌破 100%。扩展收入的增长需要提速，或流失需要被遏制。", "type": "warning"}], "background": {"narrative": "本报告基于 2023 年 6 月至 2026 年 5 月共 36 个月的 SaaS 经营月度数据，覆盖 MRR 流量分量（新增、扩展、流失）、活跃用户、试用与付费转化等核心指标。分析目标是全面诊断增长引擎健康度、留存与流失趋势、转化漏斗效率及收入质量，为管理层提供决策依据。\n\n**报告核心结论**：业务在经历前期高速增长后，近 6 个月出现明显的健康度恶化信号——NDR 跌破 100%、流失率系统性抬升、Quick Ratio 快速下降。增长仍在继续，但增长质量正在下降。", "objectives": ["拆解 MRR 增长引擎：增长由新客还是存量扩展驱动？增速是否在放缓？", "评估留存与流失健康度：NDR 是否维持负流失？流失率趋势如何？", "诊断试用转化漏斗：转化率水平与稳定性如何？", "衡量收入质量与效率：Quick Ratio 是否在安全区间？ARPA 趋势如何？"]}, "data_overview": {"narrative": "数据集包含 36 条月度记录、7 个原始字段，时间跨度  至 。所有字段无缺失值，数据质量良好。基于原始字段衍生出 Net New MRR、MRR 流失率、NDR、Quick Ratio、试用转化率、ARPA 等 SaaS 核心指标。", "stats": [{"label": "数据月份", "value": "36 个月", "note": "2023-06 至 2026-05"}, {"label": "最新 MRR", "value": "3681 千元", "note": "≈ 368 万元"}, {"label": "最新活跃用户", "value": "26,816", "note": "36 个月增长 777%"}, {"label": "字段完整度", "value": "100%", "note": "7 个原始字段无缺失"}], "quality_summary": "所有字段无缺失、无重复。日期字段为月度等间隔序列，无缺口。数值字段量级合理，无异常离群值。**数据质量满足全面分析要求。**"}, "sections": [{"id": "sec-growth", "title": "增长引擎分解", "narrative": "MRR 增长由三个分量构成：**新增**（新客签约）、**扩展**（增购/升级）和**流失**（降级/退订）。36 个月累计新增 3741 千元、扩展 899 千元、流失 958 千元。\n\n从趋势看，新增 MRR 从早期月均 ~30 千元提升至近期 ~150 千元，扩展 MRR 同步从 ~7 千元提升至 ~35 千元。但流失金额也在加速增长——从月均 ~7 千元升至 ~25 千元。**流失增速正在追赶甚至超过新增和扩展的增速**，这是近期 Quick Ratio 下降和 NDR 跌破 100% 的直接原因。\n\nMRR 环比增速从前 6 个月的 10% 降至近 6 个月的 6%，增长引擎正在减速。", "charts": [{"id": "chart_mrr_waterfall", "title": "MRR 流量分量与总 MRR 趋势", "question": "每月新增、扩展、流失各贡献多少？总 MRR 如何演变？", "option": {"tooltip": {"trigger": "axis", "axisPointer": {"type": "cross"}}, "legend": {"data": ["新增 MRR", "扩展 MRR", "流失 MRR", "总 MRR"], "top": 6}, "grid": {"left": 60, "right": 60, "top": 55, "bottom": 65}, "xAxis": {"type": "category", "data": ["2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05"], "axisLabel": {"rotate": 45, "fontSize": 10}}, "yAxis": [{"type": "value", "name": "MRR 流量（千元）", "nameTextStyle": {"fontSize": 11}}, {"type": "value", "name": "总 MRR（千元）", "nameTextStyle": {"fontSize": 11}, "splitLine": {"show": false}}], "dataZoom": [{"type": "inside"}, {"type": "slider", "height": 18, "bottom": 8}], "toolbox": {"feature": {"saveAsImage": {}, "dataView": {"readOnly": true}}}, "series": [{"name": "新增 MRR", "type": "bar", "stack": "flow", "data": [24.4, 27.4, 20.3, 29.0, 32.3, 31.0, 30.6, 39.8, 36.4, 42.6, 46.5, 52.5, 52.5, 56.7, 63.7, 71.5, 80.9, 75.4, 87.3, 90.0, 103.7, 105.9, 115.4, 125.1, 136.7, 148.9, 161.2, 172.5, 182.4, 203.4, 205.1, 212.9, 211.4, 213.0, 222.1, 230.5], "emphasis": {"focus": "series"}}, {"name": "扩展 MRR", "type": "bar", "stack": "flow", "data": [7.7, 7.4, 3.3, 6.9, 6.9, 8.6, 8.4, 6.1, 9.9, 12.7, 14.1, 8.5, 11.1, 13.3, 11.8, 16.7, 13.3, 13.0, 24.8, 18.2, 30.3, 16.9, 30.3, 28.6, 42.3, 45.7, 36.3, 47.4, 35.7, 54.1, 34.1, 50.4, 39.4, 69.6, 53.1, 61.8], "emphasis": {"focus": "series"}}, {"name": "流失 MRR", "type": "bar", "stack": "flow_neg", "data": [-6.4, -6.4, -6.0, -9.1, -6.4, -7.1, -9.1, -6.4, -11.0, -10.7, -11.7, -11.9, -11.3, -10.3, -12.8, -11.9, -15.9, -17.7, -20.5, -18.9, -21.8, -19.5, -20.2, -24.9, -23.5, -27.8, -24.1, -26.7, -36.0, -40.1, -39.8, -60.6, -65.2, -81.9, -106.5, -118.1], "itemStyle": {"color": "#c94a4a"}, "emphasis": {"focus": "series"}}, {"name": "总 MRR", "type": "line", "yAxisIndex": 1, "data": [25.7, 54.1, 71.7, 98.5, 131.3, 163.8, 193.7, 233.2, 268.5, 313.1, 362.0, 411.1, 463.4, 523.1, 585.8, 662.1, 740.4, 811.1, 902.7, 992.0, 1104.2, 1207.5, 1333.0, 1461.8, 1617.3, 1784.1, 1957.5, 2150.7, 2332.8, 2550.2, 2749.6, 2952.3, 3137.9, 3338.6, 3507.3, 3681.5], "smooth": true, "lineStyle": {"width": 3}, "symbol": "circle", "symbolSize": 5}]}, "insight": "总 MRR 呈持续上升趋势（26 → 3681 千元），但需注意红色流失柱在近期明显增高。新增和扩展虽然在增长，但流失增速更快，导致净新增 MRR 的增速放缓。", "height": 420}, {"id": "chart_growth_rate", "title": "MRR 与用户环比增速", "question": "增长速度是在加快还是放缓？用户增长与收入增长是否同步？", "option": {"tooltip": {"trigger": "axis"}, "legend": {"data": ["MRR 环比增速", "用户环比增速"], "top": 6}, "grid": {"left": 55, "right": 55, "top": 50, "bottom": 65}, "xAxis": {"type": "category", "data": ["2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05"], "axisLabel": {"rotate": 45, "fontSize": 10}}, "yAxis": {"type": "value", "name": "环比增速（%）", "axisLabel": {"formatter": "{value}%"}}, "dataZoom": [{"type": "inside"}, {"type": "slider", "height": 18, "bottom": 8}], "toolbox": {"feature": {"saveAsImage": {}, "dataView": {"readOnly": true}}}, "series": [{"name": "MRR 环比增速", "type": "line", "data": [NaN, 110.51, 32.53, 37.38, 33.3, 24.75, 18.25, 20.39, 15.14, 16.61, 15.62, 13.56, 12.72, 12.88, 11.99, 13.02, 11.83, 9.55, 11.29, 9.89, 11.31, 9.36, 10.39, 9.66, 10.64, 10.31, 9.72, 9.87, 8.47, 9.32, 7.82, 7.37, 6.29, 6.4, 5.05, 4.97], "smooth": true, "areaStyle": {"opacity": 0.12}, "lineStyle": {"width": 2.5}, "symbol": "circle", "symbolSize": 4}, {"name": "用户环比增速", "type": "line", "data": [NaN, 3.66, 1.83, 20.91, 3.2, -8.29, 18.44, -0.89, -3.64, 17.52, -2.67, 7.95, 16.65, -3.06, 20.4, 1.95, 10.63, 1.77, 11.93, -3.62, 11.08, 5.93, 15.05, -7.73, 16.53, 10.88, -0.61, 18.18, -2.75, 3.02, 16.36, 3.32, -2.47, 7.24, 8.77, 18.68], "smooth": true, "lineStyle": {"width": 2, "type": "dashed"}, "symbol": "diamond", "symbolSize": 4}]}, "insight": "MRR 环比增速呈现明显的减速趋势。前 6 个月均值 10%，近 6 个月降至 6%。用户增速与 MRR 增速大体同步，说明 ARPA 相对稳定，收入增长主要由用户规模驱动。", "height": 380}, {"id": "chart_revenue_composition", "title": "累计 MRR 流量构成", "question": "36 个月累计来看，新增 vs 扩展 vs 流失各占多少？", "option": {"tooltip": {"trigger": "item", "formatter": "{b}: {c} 千元 ({d}%)"}, "legend": {"orient": "vertical", "right": 20, "top": "center"}, "toolbox": {"feature": {"saveAsImage": {}, "dataView": {"readOnly": true}}}, "series": [{"type": "pie", "radius": ["40%", "70%"], "center": ["40%", "50%"], "avoidLabelOverlap": true, "itemStyle": {"borderRadius": 4, "borderColor": "#fffdf8", "borderWidth": 2}, "label": {"formatter": "{b}\n{d}%", "fontSize": 12}, "data": [{"value": 3741.0, "name": "新增 MRR"}, {"value": 898.7, "name": "扩展 MRR"}, {"value": 958.2, "name": "流失 MRR", "itemStyle": {"color": "#c94a4a"}}]}]}, "insight": "扩展收入占新增+扩展总额的 19%，反映存量客户的价值挖掘能力。流失占总流入的 21%。从累计看侵蚀效应有限，但近期流失占比正在上升。", "height": 360}]}, {"id": "sec-retention", "title": "留存与流失分析", "narrative": "**这是本报告最关键的分析章节。**\n\nMRR 流失率近 6 个月均值 2.5%，较前 6 个月的 1.6% 上升了约 60%。流失率从 2025 年下半年开始系统性抬升，从 ~1.5% 区间升至 ~2.5%–3.4% 区间。\n\nNDR（净收入留存率）近 6 个月均值 99.2%，已跌破 100%。36 个月中有 19 个月 NDR 低于 100%，且集中在近期。这意味着存量客户收入已出现**净收缩**——扩展收入已不足以弥补流失。\n\nQuick Ratio 从前期均值 7.3 骤降至近 6 个月 3.8，最近 3 个月分别为 3.5、2.6、2.5，下降趋势陡峭。若按当前趋势，2–3 个月内可能触及 2.0 承压线。", "charts": [{"id": "chart_churn_ndr", "title": "MRR 流失率与净收入留存率 (NDR)", "question": "流失是否在恶化？存量客户收入是否还在净增长？", "option": {"tooltip": {"trigger": "axis", "axisPointer": {"type": "cross"}}, "legend": {"data": ["MRR 流失率", "净收入留存率 (NDR)"], "top": 6}, "grid": {"left": 55, "right": 60, "top": 50, "bottom": 65}, "xAxis": {"type": "category", "data": ["2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05"], "axisLabel": {"rotate": 45, "fontSize": 10}}, "yAxis": [{"type": "value", "name": "流失率（%）", "axisLabel": {"formatter": "{value}%"}}, {"type": "value", "name": "NDR（%）", "axisLabel": {"formatter": "{value}%"}, "splitLine": {"show": false}}], "dataZoom": [{"type": "inside"}, {"type": "slider", "height": 18, "bottom": 8}], "toolbox": {"feature": {"saveAsImage": {}, "dataView": {"readOnly": true}}}, "series": [{"name": "MRR 流失率", "type": "line", "data": [Infinity, 24.9, 11.09, 12.69, 6.5, 5.41, 5.56, 3.3, 4.72, 3.99, 3.74, 3.29, 2.75, 2.22, 2.45, 2.03, 2.4, 2.39, 2.53, 2.09, 2.2, 1.77, 1.67, 1.87, 1.61, 1.72, 1.35, 1.36, 1.67, 1.72, 1.56, 2.2, 2.21, 2.61, 3.19, 3.37], "smooth": true, "lineStyle": {"width": 2.5, "color": "#c94a4a"}, "itemStyle": {"color": "#c94a4a"}, "areaStyle": {"opacity": 0.08, "color": "#c94a4a"}, "symbol": "circle", "symbolSize": 4}, {"name": "净收入留存率 (NDR)", "type": "line", "yAxisIndex": 1, "data": [Infinity, 103.89, 95.01, 96.93, 100.51, 101.14, 99.57, 99.85, 99.53, 100.74, 100.77, 99.06, 99.95, 100.65, 99.81, 100.82, 99.61, 99.37, 100.53, 99.92, 100.86, 99.76, 100.84, 100.28, 101.29, 101.11, 100.68, 101.06, 99.99, 100.6, 99.78, 99.63, 99.13, 99.61, 98.4, 98.39], "smooth": true, "lineStyle": {"width": 2.5}, "symbol": "circle", "symbolSize": 4, "markLine": {"silent": true, "data": [{"yAxis": 100, "name": "NDR=100%", "lineStyle": {"type": "dashed", "color": "#9d9182"}}]}}]}, "insight": "红色流失率曲线在 2025 年下半年明显抬升，NDR 曲线同步下行并跌破 100% 虚线。这是业务健康度恶化的核心信号：存量客户收入已从净增长转为净收缩。", "height": 400}, {"id": "chart_quick_ratio", "title": "Quick Ratio 趋势", "question": "增长效率是否健康？每流失 1 元能补回多少？", "option": {"tooltip": {"trigger": "axis", "formatter": "{b}<br/>{a}: {c}"}, "legend": {"data": ["Quick Ratio"], "top": 6}, "grid": {"left": 55, "right": 30, "top": 50, "bottom": 65}, "xAxis": {"type": "category", "data": ["2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05"], "axisLabel": {"rotate": 45, "fontSize": 10}}, "yAxis": {"type": "value", "name": "Quick Ratio"}, "dataZoom": [{"type": "inside"}, {"type": "slider", "height": 18, "bottom": 8}], "toolbox": {"feature": {"saveAsImage": {}, "dataView": {"readOnly": true}}}, "series": [{"name": "Quick Ratio", "type": "line", "data": [5.02, 5.44, 3.93, 3.95, 6.12, 5.58, 4.29, 7.17, 4.21, 5.17, 5.18, 5.13, 5.63, 6.8, 5.9, 7.41, 5.92, 4.99, 5.47, 5.72, 6.15, 6.3, 7.21, 6.17, 7.62, 7.0, 8.2, 8.24, 6.06, 6.42, 6.01, 4.34, 3.85, 3.45, 2.58, 2.48], "smooth": true, "lineStyle": {"width": 2.5}, "symbol": "circle", "symbolSize": 4, "areaStyle": {"opacity": 0.1}, "markLine": {"silent": true, "data": [{"yAxis": 2, "name": "承压线", "lineStyle": {"type": "dashed", "color": "#c94a4a"}}, {"yAxis": 4, "name": "健康线", "lineStyle": {"type": "dashed", "color": "#4a6741"}}]}}]}, "insight": "Quick Ratio 从早期高位持续下降，近 3 个月加速下滑至 2.5–3.5 区间。虽然仍高于 2.0 承压线，但下降斜率陡峭。若流失继续加速而新增/扩展未能提速，该指标将进一步恶化。", "height": 380}]}, {"id": "sec-funnel", "title": "试用转化漏斗", "narrative": "试用 → 付费是 SaaS 获客漏斗的关键环节。36 个月累计 17,651 次试用，3,257 次付费转化，整体转化率 18.5%。\n\n转化率月度波动较大：最高达 22.9%，最低仅 13.0%。高波动通常意味着试用来源质量不稳定、onboarding 流程标准化不足、或销售跟进节奏不一致。值得注意的是，部分月份试用量大但转化率反而低，提示试用来源质量参差不齐。", "charts": [{"id": "chart_trial_funnel", "title": "试用量、转化量与转化率", "question": "试用转化效率如何？转化率是否稳定？", "option": {"tooltip": {"trigger": "axis", "axisPointer": {"type": "cross"}}, "legend": {"data": ["新试用数", "转化付费数", "转化率"], "top": 6}, "grid": {"left": 55, "right": 60, "top": 50, "bottom": 65}, "xAxis": {"type": "category", "data": ["2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05"], "axisLabel": {"rotate": 45, "fontSize": 10}}, "yAxis": [{"type": "value", "name": "人数"}, {"type": "value", "name": "转化率（%）", "axisLabel": {"formatter": "{value}%"}, "splitLine": {"show": false}}], "dataZoom": [{"type": "inside"}, {"type": "slider", "height": 18, "bottom": 8}], "toolbox": {"feature": {"saveAsImage": {}, "dataView": {"readOnly": true}}}, "series": [{"name": "新试用数", "type": "bar", "data": [284, 205, 567, 287, 427, 228, 245, 314, 454, 466, 615, 312, 583, 256, 392, 348, 333, 549, 699, 602, 694, 584, 350, 489, 712, 369, 401, 741, 402, 813, 731, 697, 647, 454, 608, 793], "barGap": "10%", "emphasis": {"focus": "series"}}, {"name": "转化付费数", "type": "bar", "data": [37, 40, 121, 50, 82, 37, 37, 66, 86, 90, 138, 46, 95, 47, 63, 70, 58, 82, 127, 111, 144, 112, 67, 92, 124, 58, 75, 125, 92, 179, 145, 133, 114, 64, 105, 145], "emphasis": {"focus": "series"}}, {"name": "转化率", "type": "line", "yAxisIndex": 1, "data": [13.03, 19.51, 21.34, 17.42, 19.2, 16.23, 15.1, 21.02, 18.94, 19.31, 22.44, 14.74, 16.3, 18.36, 16.07, 20.11, 17.42, 14.94, 18.17, 18.44, 20.75, 19.18, 19.14, 18.81, 17.42, 15.72, 18.7, 16.87, 22.89, 22.02, 19.84, 19.08, 17.62, 14.1, 17.27, 18.28], "smooth": true, "lineStyle": {"width": 2.5}, "symbol": "circle", "symbolSize": 5}]}, "insight": "试用量与转化量大体正相关，但转化率波动显著（13.0%–22.9%）。部分月份试用量大但转化率反而低，提示试用来源质量可能参差不齐。建议按渠道拆分转化率，识别高质量来源并优化低质量渠道投放。", "height": 400}]}, {"id": "sec-quality", "title": "收入质量与用户价值", "narrative": "ARPA（每用户平均收入）反映用户价值密度。当前 ARPA 约 0.137 千元/用户，36 个月来基本稳定。ARPA 稳定意味着收入增长主要由用户规模扩张驱动，而非提价或向上销售。\n\n活跃用户从 3,058 增长至 26,816，累计增幅 777%。用户增长与 MRR 增长高度同步，业务模型呈现典型的「规模驱动」特征。\n\n**关键问题**：在流失加速的背景下，单纯依赖用户规模增长的模式面临挑战——如果留存不住，获客投入的回报周期会缩短，LTV/CAC 会下降。", "charts": [{"id": "chart_users_arpa", "title": "活跃用户与 ARPA 趋势", "question": "用户价值密度是否在提升？增长靠量还是靠价？", "option": {"tooltip": {"trigger": "axis", "axisPointer": {"type": "cross"}}, "legend": {"data": ["活跃用户", "ARPA（千元/用户）"], "top": 6}, "grid": {"left": 60, "right": 65, "top": 50, "bottom": 65}, "xAxis": {"type": "category", "data": ["2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05"], "axisLabel": {"rotate": 45, "fontSize": 10}}, "yAxis": [{"type": "value", "name": "活跃用户数"}, {"type": "value", "name": "ARPA（千元）", "splitLine": {"show": false}}], "dataZoom": [{"type": "inside"}, {"type": "slider", "height": 18, "bottom": 8}], "toolbox": {"feature": {"saveAsImage": {}, "dataView": {"readOnly": true}}}, "series": [{"name": "活跃用户", "type": "bar", "data": [3058, 3170, 3228, 3903, 4028, 3694, 4375, 4336, 4178, 4910, 4779, 5159, 6018, 5834, 7024, 7161, 7922, 8062, 9024, 8697, 9661, 10234, 11774, 10864, 12660, 14038, 13953, 16490, 16037, 16521, 19224, 19863, 19372, 20774, 22596, 26816], "emphasis": {"focus": "series"}, "itemStyle": {"opacity": 0.6}}, {"name": "ARPA（千元/用户）", "type": "line", "yAxisIndex": 1, "data": [0.0084, 0.0171, 0.0222, 0.0252, 0.0326, 0.0443, 0.0443, 0.0538, 0.0643, 0.0638, 0.0757, 0.0797, 0.077, 0.0897, 0.0834, 0.0925, 0.0935, 0.1006, 0.1, 0.1141, 0.1143, 0.118, 0.1132, 0.1346, 0.1277, 0.1271, 0.1403, 0.1304, 0.1455, 0.1544, 0.143, 0.1486, 0.162, 0.1607, 0.1552, 0.1373], "smooth": true, "lineStyle": {"width": 2.5}, "symbol": "circle", "symbolSize": 4}]}, "insight": "活跃用户持续增长，ARPA 基本稳定。收入增长主要靠用户规模扩张驱动。在流失加速的背景下，提升 ARPA（通过功能分层定价、高级版本推广等）成为维持增长质量的关键杠杆——每个留下来的客户需要贡献更多收入。", "height": 400}], "tables": [{"title": "核心 KPI 对比：近 6 个月 vs 前 6 个月", "columns": ["指标", "前 6 个月", "近 6 个月", "变化", "判断"], "rows": [["总 MRR 均值（千元）", "2065", "3228", "+56%", "↑ 仍在增长"], ["MRR 环比增速", "9.7%", "6.3%", "-3.4%", "↓ 明显放缓"], ["MRR 流失率", "1.6%", "2.5%", "+1.0%", "↑ 显著恶化"], ["NDR", "100.8%", "99.2%", "-1.6pp", "↓ 跌破 100%"], ["Quick Ratio", "7.3", "3.8", "-3.5", "↓ 快速下降"], ["试用转化率", "18.9%", "17.7%", "-1.2pp", "→ 波动较大"], ["ARPA（千元）", "0.1376", "0.1511", "+9.9%", "→ 基本稳定"]]}]}], "conclusions": {"narrative": "这份数据呈现一个**「增长未停、但质量在恶化」**的故事。总 MRR 仍在上升，用户规模仍在扩大，但近 6 个月几乎所有健康度指标都在亮红灯：\n\n- 流失率上升 60%（1.6% → 2.5%）\n- NDR 跌破 100%（100.8% → 99.2%），存量收入净收缩\n- Quick Ratio 从 7.3 骤降至 3.8，逼近承压线\n- MRR 环比增速从 10% 降至 6%\n\n如果不采取干预措施，按当前趋势外推，Quick Ratio 可能在 2–3 个月内触及 2.0 承压线，届时增长将变得非常低效。**流失问题是当前最紧迫的议题**——它同时拖累了 NDR、Quick Ratio 和增速。", "recommendations": [{"title": "紧急：启动流失根因分析，按客户分层定位流失来源", "detail": "流失率从 1.6% 升至 2.5%，是 NDR 跌破 100% 和 Quick Ratio 下降的直接原因。建议立即：(1) 按客户规模、行业、使用频率、合同期限分层拆解流失来源；(2) 对近 3 个月流失客户做回访，识别流失原因（产品满意度/价格/竞争/需求变化）；(3) 建立流失预警模型，在客户活跃度下降时主动触达。", "priority": "高"}, {"title": "建立 NDR 与 Quick Ratio 的月度监控与预警机制", "detail": "建议将 NDR 和 Quick Ratio 纳入月度经营会议的核心看板。设定预警阈值：NDR < 100% 或 Quick Ratio < 3 时触发专项分析。当前两个指标均已触发预警，需要持续跟踪直到趋势逆转。", "priority": "高"}, {"title": "加速扩展收入：推动存量客户向上销售", "detail": "扩展收入占流入的 19%，说明产品有向上销售能力，但近期扩展速度不足以对冲流失。建议：(1) 识别高活跃但未升级的客户群体，定向推送高级功能；(2) 引入使用量阶梯定价，让高用量客户自然贡献更多收入；(3) 建立客户成功团队，主动推动关键客户的扩展。", "priority": "高"}, {"title": "标准化试用转化流程，提升获客效率", "detail": "转化率在 13.0%–22.9% 之间波动。在流失加速的背景下，每个新客的价值更加重要。建议：(1) 按渠道追踪试用来源质量与后续留存；(2) 建立标准化 onboarding 流程；(3) 设定转化率基线并纳入运营看板。", "priority": "中"}, {"title": "探索 ARPA 提升路径，降低对规模扩张的单一依赖", "detail": "ARPA 36 个月基本未变，收入增长完全依赖用户规模。在流失加速的环境下，单纯追求用户增长的 ROI 会下降。建议引入功能分层定价（如 Advanced/Enterprise 版本），提升每用户收入，让增长更可持续。", "priority": "中"}]}, "appendix": {"processing_notes": ["原始数据 36 行 × 7 列，无缺失值、无重复行，日期字段为月度等间隔序列", "总 MRR 通过逐月累加 Net New MRR（新增 + 扩展 − 流失）计算得出；首月期初 MRR 假设为 0", "MRR 流失率 = 当月流失 MRR / 月初 MRR；首月因无前期数据，以期初 MRR = 首月总 MRR − 首月净新增作为分母", "NDR = (月初 MRR + 扩展 MRR − 流失 MRR) / 月初 MRR；>100% 表示负净流失", "Quick Ratio = (新增 MRR + 扩展 MRR) / 流失 MRR；数据中无「收缩 MRR」字段，收缩部分为 0", "ARPA = 总 MRR / 活跃用户数；活跃用户数作为账户数代理指标，可能与实际付费账户数存在偏差", "环比增速 = (当月总 MRR − 上月总 MRR) / 上月总 MRR；首月无环比数据", "所有金额单位为「千元」，报告中保留原始单位未做换算"], "methods_notes": ["本报告以描述性分析为主，未做统计检验或预测建模。36 个月数据点满足趋势描述需求，但如需预测建议补充至 48+ 个月", "未引入外部行业基准数据（用户未提供且未授权联网检索），所有判断基于数据内部趋势对比", "Quick Ratio 趋势外推仅为方向性参考，不构成精确预测", "试用转化率未区分转化窗口期（如 14 天/30 天），如实际存在窗口期差异，月度波动可能部分源于统计口径变化"]}};
+
+(function () {
+  const D = window.__REPORT_DATA__;
+  if (!D) { document.body.innerHTML = '<p style="padding:40px">报告数据注入失败：数据占位符未被替换。</p>'; return; }
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  // 行内有限 Markdown：**加粗**
+  const mdInline = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // 短字段：加粗 + 换行（行为与原 md 完全一致）
+  const md = (s) => mdInline(s).replace(/\n/g, '<br>');
+  // narrative 专用块级 Markdown：空行分段、### 小标题、-/1. 列表（\d{1,3} 防年份误判，兼容 1、）
+  const mdBlock = (s) => {
+    const out = []; let para = [], list = null;
+    const fp = () => { if (para.length) { out.push('<p>' + para.map(mdInline).join('<br>') + '</p>'); para = []; } };
+    const fl = () => { if (list) { out.push('<' + list.t + '>' + list.items.map(i => '<li>' + mdInline(i) + '</li>').join('') + '</' + list.t + '>'); list = null; } };
+    for (const raw of String(s ?? '').split('\n')) {
+      const line = raw.trim(); let m;
+      if (!line) { fp(); fl(); }
+      else if ((m = line.match(/^###\s+(.*)/)))        { fp(); fl(); out.push('<h4>' + mdInline(m[1]) + '</h4>'); }
+      else if ((m = line.match(/^[-*]\s+(.*)/)))       { fp(); if (list && list.t !== 'ul') fl(); list = list || { t: 'ul', items: [] }; list.items.push(m[1]); }
+      else if ((m = line.match(/^\d{1,3}[.、]\s*(.*)/))) { fp(); if (list && list.t !== 'ol') fl(); list = list || { t: 'ol', items: [] }; list.items.push(m[1]); }
+      else { fl(); para.push(line); }
+    }
+    fp(); fl(); return out.join('');
+  };
+
+  /* ---------- 报头与元信息 ---------- */
+  document.title = D.meta.title || '数据分析报告';
+  $('r-title').textContent = D.meta.title || '数据分析报告';
+  $('r-subtitle').textContent = D.meta.subtitle || '';
+  $('r-date').textContent = D.meta.date || '';
+  $('r-industry').textContent = D.meta.industry_label || '';
+  $('r-audience').textContent = D.meta.audience || '';
+  ['r-date', 'r-industry', 'r-audience'].forEach(id => {
+    const el = $(id); if (!el.textContent) el.closest('li').style.display = 'none';
+  });
+
+  /* ---------- 1 核心发现 ---------- */
+  const tone = { positive: ['t-positive', '正向'], negative: ['t-negative', '风险'],
+                 warning:  ['t-warning', '关注'],  neutral:  ['t-neutral', '提示'] };
+  $('findings-list').innerHTML = (D.key_findings || []).map((f, i) => {
+    const [cls, tag] = tone[f.type] || tone.neutral;
+    return `
+    <article class="finding">
+      <span class="finding-no ${cls}">${String(i + 1).padStart(2, '0')}</span>
+      <div class="finding-body">
+        <p class="finding-head">${md(f.headline)}</p>
+        ${f.detail ? `<p class="finding-detail">${md(f.detail)}</p>` : ''}
+      </div>
+      <span class="finding-tag ${cls}">${tag}</span>
+    </article>`;
+  }).join('');
+
+  /* ---------- 2 背景与目标 ---------- */
+  $('bg-narrative').innerHTML = mdBlock(D.background?.narrative || '');
+  $('bg-objectives').innerHTML = (D.background?.objectives || []).map(o => `<li>${md(o)}</li>`).join('');
+
+  /* ---------- 3 数据概况 ---------- */
+  $('ov-narrative').innerHTML = mdBlock(D.data_overview?.narrative || '');
+  $('ov-stats').innerHTML = (D.data_overview?.stats || []).map(s => `
+    <div class="stat">
+      <p class="stat-label">${esc(s.label)}</p>
+      <p class="stat-value">${esc(s.value)}</p>
+      ${s.note ? `<p class="stat-note">${esc(s.note)}</p>` : ''}
+    </div>`).join('');
+  $('ov-quality').innerHTML = '<span class="q-label">数据质量</span>' + md(D.data_overview?.quality_summary || '—');
+
+  /* ---------- 4 深入分析 ---------- */
+  const chartJobs = [];
+  let figNo = 0, tabNo = 0;
+  const numLike = (v) => /^[\s¥$€＋+\-−]*[\d,.]+\s*[%％万亿kKmMwW]*\s*$/.test(String(v ?? '').trim());
+  // 表格双模式：≤TBL_STATIC_MAX 行直出静态出版表；超过则交 Grid.js 交互表（分页/搜索/排序）
+  const TBL_STATIC_MAX = 20;
+  const gridJobs = [];
+  // 解析展示格式字符串为可比数字："¥1,200,000"→1200000、"12.4%"→12.4、"3.2万"→32000；失败返 null
+  const parseNum = (v) => {
+    const s = String(v ?? '').trim().replace(/[¥$€,\s＋+]/g, '').replace(/％/g, '%').replace(/−/g, '-');
+    const n = parseFloat(s);
+    if (isNaN(n)) return null;
+    return n * (/亿/.test(s) ? 1e8 : /[万wW]/.test(s) ? 1e4 : /[mM]$/.test(s) ? 1e6 : /[kK]$/.test(s) ? 1e3 : 1);
+  };
+  const numCompare = (a, b) => {
+    const x = parseNum(a), y = parseNum(b);
+    if (x === null && y === null) return 0;
+    if (x === null) return 1;          // 非数值（"—"等）排后；desc 时被库取反，接受
+    if (y === null) return -1;
+    return x > y ? 1 : x < y ? -1 : 0;
+  };
+  const GRID_LANG = {
+    search: { placeholder: '搜索表格内容…' },
+    sort: { sortAsc: '升序排列', sortDesc: '降序排列' },
+    pagination: { previous: '上一页', next: '下一页',
+      navigate: (page, pages) => `第 ${page} 页，共 ${pages} 页`,
+      page: (page) => `第 ${page} 页`,
+      showing: '当前显示', to: '至', of: '条，共', results: () => '条记录' },
+    loading: '加载中…', noRecordsFound: '没有匹配的记录', error: '表格数据加载出错',
+  };
+  // 静态出版表：≤20 行的直出路径，也是 Grid.js 双源皆失败时的降级渲染（拼接与历史版本逐字一致）
+  const staticTableHtml = (t, numCols) => `
+          <table>
+            <thead><tr>${(t.columns || []).map((c, ci) => `<th${numCols[ci] ? ' class="num"' : ''}>${esc(c)}</th>`).join('')}</tr></thead>
+            <tbody>${(t.rows || []).map(r => `<tr>
+              ${r.map((v, ci) => `<td${numCols[ci] ? ' class="num"' : ''}>${esc(v)}</td>`).join('')}</tr>`).join('')}
+            </tbody>
+          </table>`;
+  $('analysis-sections').innerHTML = (D.sections || []).map((sec, si) => `
+    <section id="${esc(sec.id)}" class="reveal">
+      <div class="section-head"><span class="section-index">${String(si + 4).padStart(2, '0')}</span><h2 class="section-title">${esc(sec.title)}</h2></div>
+      ${sec.narrative ? `<div class="narrative prose">${mdBlock(sec.narrative)}</div>` : ''}
+      ${(sec.charts || []).map(ch => {
+        chartJobs.push(ch); figNo += 1;
+        return `
+        <figure class="figure" style="margin-left:0;margin-right:0">
+          <figcaption>
+            <div class="figure-mark"></div>
+            <p class="figure-title">${esc(ch.title)}</p>
+            <p class="figure-sub"><span>${esc(ch.question || '')}</span><span class="figure-no">图 ${figNo}</span></p>
+          </figcaption>
+          <div id="${esc(ch.id)}" class="chart-box" style="height:${(ch.height || 400)}px"></div>
+          <div class="figure-insight"><span class="insight-label">解读</span>${md(ch.insight || '')}</div>
+        </figure>`;
+      }).join('')}
+      ${(sec.tables || []).map(t => {
+        tabNo += 1;
+        const numCols = (t.columns || []).map((_, ci) => {
+          const vals = (t.rows || []).map(r => r[ci]).filter(v => String(v ?? '').trim() !== '');
+          return vals.length > 0 && vals.filter(numLike).length / vals.length > 0.6;
+        });
+        const head = `
+        <div class="table-block">
+          <div class="figure-mark"></div>
+          <p class="tbl-title">${esc(t.title)}</p>
+          <p class="tbl-sub"><span class="figure-no">表 ${tabNo}</span></p>`;
+        if ((t.rows || []).length <= TBL_STATIC_MAX) return `${head}${staticTableHtml(t, numCols)}
+        </div>`;
+        const gid = `tbl-grid-${tabNo}`;        // >20 行：先出空容器，交 renderGrids 渲染
+        gridJobs.push({ gid, t, numCols });
+        return `${head}
+          <div id="${gid}"></div>
+        </div>`;
+      }).join('')}
+    </section>`).join('');
+
+  /* ---------- 5 结论与建议 ---------- */
+  $('cc-no').textContent = String((D.sections || []).length + 4).padStart(2, '0');
+  $('cc-narrative').innerHTML = mdBlock(D.conclusions?.narrative || '');
+  const prio = { '高': ['p-high', '高'], '中': ['p-mid', '中'], '低': ['p-low', '低'] };
+  $('cc-recommendations').innerHTML = (D.conclusions?.recommendations || []).map((r, i) => {
+    const [cls, label] = prio[r.priority] || ['p-low', r.priority || '建议'];
+    return `
+    <div class="rec">
+      <span class="rec-prio ${cls}">${esc(label)}</span>
+      <div><p class="rec-title"><span class="rec-no">${String(i + 1).padStart(2, '0')}</span>${md(r.title)}</p>
+        ${r.detail ? `<p class="rec-detail">${md(r.detail)}</p>` : ''}</div>
+    </div>`;
+  }).join('');
+
+  /* ---------- 6 附录 ---------- */
+  $('ap-processing').innerHTML = (D.appendix?.processing_notes || []).map(n => `<li>${md(n)}</li>`).join('');
+  const mn = D.appendix?.methods_notes || [];
+  if (mn.length) { $('ap-methods-title').style.display = ''; $('ap-methods').innerHTML = mn.map(n => `<li>${md(n)}</li>`).join(''); }
+
+  /* ---------- 目录 ---------- */
+  const tocItems = [
+    ['sec-findings', '核心发现'], ['sec-background', '分析背景与目标'], ['sec-overview', '数据概况'],
+    ...(D.sections || []).map(s => [s.id, s.title]),
+    ['sec-conclusions', '结论与建议'], ['sec-appendix', '附录：数据处理说明'],
+  ];
+  $('toc-list').innerHTML = tocItems.map(([id, label], i) =>
+    `<li><a href="#${esc(id)}" data-sec="${esc(id)}"><span class="toc-no">${String(i + 1).padStart(2, '0')}</span><span>${esc(label)}</span></a></li>`).join('');
+
+  /* ---------- 滚动显现 + 目录跟随 ---------- */
+  if (window.IntersectionObserver) {
+    const revealObs = new IntersectionObserver((es) => es.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('on'); revealObs.unobserve(e.target); }
+    }), { rootMargin: '0px 0px -8% 0px' });
+    document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+    const links = Array.from(document.querySelectorAll('#toc-list a'));
+    const spyObs = new IntersectionObserver((es) => {
+      const hit = es.find(e => e.isIntersecting);
+      if (!hit) return;
+      links.forEach(a => a.classList.toggle('active', a.dataset.sec === hit.target.id));
+    }, { rootMargin: '-12% 0px -62% 0px' });
+    tocItems.forEach(([id]) => { const el = document.getElementById(id); if (el) spyObs.observe(el); });
+  } else {
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('on'));
+  }
+
+  /* ---------- ECharts 渲染 ---------- */
+  function renderCharts() {
+    if (!window.echarts) { setTimeout(renderCharts, 300); return; }  // 等待备源加载
+    // economist 主题：「红印·出版」同源色板；option 自带配置优先于主题
+    const FONT = '-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+    const AXIS = { axisLine: { lineStyle: { color: '#121212' } }, axisTick: { lineStyle: { color: '#c9c9c9' } },
+                   axisLabel: { color: '#6b6b6b' }, splitLine: { lineStyle: { color: '#e3e3e3' } },
+                   nameTextStyle: { color: '#9a9a9a' } };
+    echarts.registerTheme('economist', {
+      color: ['#006ba6', '#3ebcd2', '#e3120b', '#f6a44c', '#76c0c1', '#963c4c', '#1d3956', '#b5b5b5'],
+      backgroundColor: 'transparent',
+      textStyle: { fontFamily: FONT, color: '#6b6b6b' },
+      categoryAxis: AXIS, valueAxis: AXIS, timeAxis: AXIS, logAxis: AXIS,
+      legend: { textStyle: { color: '#404040', fontFamily: FONT } },
+      title: { textStyle: { color: '#121212', fontFamily: FONT }, subtextStyle: { color: '#9a9a9a' } },
+      tooltip: { backgroundColor: '#ffffff', borderColor: '#dcdcdc', borderWidth: 1,
+                 textStyle: { color: '#121212', fontFamily: FONT },
+                 extraCssText: 'box-shadow:0 4px 14px rgba(0,0,0,.10)' },
+      toolbox: { iconStyle: { borderColor: '#9a9a9a' } },
+      dataZoom: { borderColor: '#c9c9c9', fillerColor: 'rgba(0,107,166,0.08)',
+                  handleStyle: { color: '#006ba6' }, textStyle: { color: '#9a9a9a' } },
+      visualMap: { textStyle: { color: '#6b6b6b' } },
+    });
+    const instances = chartJobs.map(ch => {
+      const el = document.getElementById(ch.id);
+      if (!el || !ch.option) return null;
+      const inst = echarts.init(el, 'economist');
+      inst.setOption(ch.option);
+      return inst;
+    }).filter(Boolean);
+    window.addEventListener('resize', () => instances.forEach(i => i.resize()));
+  }
+  renderCharts();
+
+  /* ---------- Grid.js 渲染（>20 行交互表） ---------- */
+  function renderGrids(tries) {
+    if (!gridJobs.length) return;
+    if (!window.gridjs) {
+      if (tries > 20) {   // ~6 秒双源皆失败：降级为静态全量表，数据不丢
+        gridJobs.forEach(j => { document.getElementById(j.gid).outerHTML = staticTableHtml(j.t, j.numCols); });
+        return;
+      }
+      setTimeout(() => renderGrids(tries + 1), 300); return;
+    }
+    gridJobs.forEach(j => {
+      new gridjs.Grid({
+        // 数字列：解析值排序 + data-num 对齐钩子；attributes 禁注 class/style（会覆盖 autoWidth 列宽）
+        columns: (j.t.columns || []).map((c, ci) => (j.numCols[ci]
+          ? { name: c, sort: { compare: numCompare }, attributes: { 'data-num': '' } }
+          : { name: c })),
+        data: j.t.rows || [],
+        sort: true,
+        search: true,
+        pagination: { limit: 15, summary: true },   // 阈值 21 行起步，恒有 ≥2 页，分页不空转
+        language: GRID_LANG,
+      }).render(document.getElementById(j.gid));
+    });
+  }
+  renderGrids(0);
+
+  /* ---------- 导出 PDF（浏览器原生打印，100% CSS 保真） ---------- */
+  document.getElementById('btn-export-pdf').addEventListener('click', function () {
+    window.print();
+  });
+})();
+</script>
+</body>
+</html>
