@@ -50,7 +50,7 @@ v0.x 阶段允许破坏性变更（MINOR 即可含不兼容调整）。以下条
 | 首批模版齐全 | 首批规划的行业模版全部交付（含 stock、finance） | ⬜ 进行中 |
 | Evals 全绿 | T1–T14 全部 with_skill 通过，且一轮 iteration 无新增失败 | T1–T7 ✅ iteration-1；T8–T12 ⬜ 待 iteration-5；T13–T14 ✅ iteration-6 |
 | 文档同步 | README / CLAUDE.md / 需求文档三者对齐，无滞后描述 | ✅ v0.17 对齐一轮（README 中英双版 + CLAUDE.md + 需求文档 §1/§9 + 本文件） |
-| 跨宿主验收 | 三宿主门禁/纪律/报告结构一致性核对表全项回填 | ⬜ WorkBuddy 待跑（`docs/跨宿主验收清单.md`） |
+| 跨宿主验收 | 三宿主门禁/纪律/报告结构一致性核对表全项回填 | 🟡 WorkBuddy 已实测可加载可运行，S1–S5 逐项待回填（`docs/跨宿主验收清单.md`） |
 
 v1.0.0 发布后，MINOR 升级承诺不破坏已有报告渲染。
 
@@ -79,7 +79,7 @@ v0.17 (2026-08-06, 当前)
  │  + SKILL.md 宿主条款中立化（门禁不降级，只降级呈现）
  │  + 插件市场分发形态（.claude-plugin / .codex-plugin / .agents）
  │  + README 中文优先（README.md 中文 / README.en.md 英文）
- │  + docs/跨宿主验收清单.md（WorkBuddy 冒烟待回填）
+ │  + docs/跨宿主验收清单.md（WorkBuddy 已实测可运行，S1–S5 逐项待回填）
  │  五阶段流程 / 统计纪律 / 模板契约均未动
  │
  ▼

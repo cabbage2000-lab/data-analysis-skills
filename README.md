@@ -19,7 +19,7 @@
 |------|----------------|----------------|
 | **Claude Code** | `~/.claude/skills/data-analysis-skill` | 主力宿主，T1–T14 全量 eval 通过 |
 | **Codex CLI** | `~/.codex/skills/data-analysis-skill` | 已适配：任务清单走 `update_plan`、门禁提问降级为文本编号选择题；交互式全流程与 `codex exec` 冒烟验收通过 |
-| **WorkBuddy** | `~/.workbuddy/skills/data-analysis-skill` | 已适配：安装路径已实测就位、同步脚本已覆盖；交互行为按[跨宿主验收清单](docs/跨宿主验收清单.md)人工冒烟（诚实标注：尚未完成全项回填） |
+| **WorkBuddy** | `~/.workbuddy/skills/data-analysis-skill` | 已适配：安装路径已实测就位，**作者已在 WorkBuddy 实测可加载、可运行**；[跨宿主验收清单](docs/跨宿主验收清单.md)的 S1–S5 逐项核对尚未回填 |
 | 其它同构工具 | 该工具自己的 skills 目录 | 只要读 `SKILL.md` + frontmatter + 子目录资源就能加载，未逐一实测 |
 
 跨宿主的**不变量**：五阶段流程、阶段 1 确认门禁、统计纪律、报告六段式结构——这些不因宿主而变。**变的只有交互外观**：宿主有结构化提问工具就用（如 AskUserQuestion），没有就降级成编号文本选择题并等你回复；有任务清单工具就用（TodoWrite / update_plan），没有就打印纯文本阶段清单。**门禁本身从不降级，只有它的呈现方式会降级。**
