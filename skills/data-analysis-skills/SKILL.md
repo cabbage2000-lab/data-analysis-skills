@@ -1,165 +1,169 @@
 ---
 name: data-analysis-skills
-description: Use when the user provides data files (CSV/Excel/JSON/TSV) or tabular data and wants analysis, insights, or a report — e.g. 分析数据、做数据报告、数据洞察, sales/operations/business data review, EDA, A/B test evaluation, forecasting, or an interactive HTML data report. Not for building dashboard apps, web scraping, or live database connections.
+description: 当用户提供数据文件（CSV / Excel / JSON / TSV）或表格数据，想要做分析、找洞察或要一份报告时使用——例如「分析数据」「做数据报告」「帮我看看这份数据」「这批订单数据说明什么」，以及销售 / 经营 / 运营数据复盘、探索性分析（EDA）、A/B 实验评估、趋势预测，或要一份可交互的 HTML 数据报告。不适用于：搭建 dashboard 应用、网页爬取、连接线上数据库。
+slug: data-analysis-skills
+displayName: 数据分析报告·行业化叙事
+version: 0.18.3
+summary: 给一份数据文件（CSV / Excel / JSON / TSV），交付一份可直接拿去汇报的单文件 HTML 交互式报告——结论先行、每图配解读、处理过程可追溯。内置零售 / SaaS / 自媒体 / 企业财务 / 基金 / 房地产 / 建筑 / 教育等行业视角；统计纪律强制：不杜撰行业基准、相关不当因果、小样本不硬下结论。
 ---
 
-# data-analysis-skills: Industry-Aware Data Analysis & Narrative Reporting
+# data-analysis-skills：行业化数据分析与叙事报告
 
-## Overview
+## 概述
 
-Turn raw data into industry-aware data stories that speak for themselves — the deliverable is not isolated charts and numbers, but an analysis report with insights, conclusions, and the power to drive business decisions.
+把原始数据变成会自己讲故事的行业化数据报告——交付物不是孤立的图表和数字，而是一份有洞察、有结论、能推动业务决策的分析报告。
 
 ```
-One analysis = five-phase workflow (the main line)
-             × one industry template industries/ (what to analyze, who to speak to)
-             × method modules references/ loaded on demand (how to analyze)
-             → data JSON injected into assets/report_template.html → single-file HTML report
+一次分析 = 五阶段流程（主线）
+         × 一个行业模版 industries/（分析什么、对谁说）
+         × 按需加载的方法模块 references/（怎么分析）
+         → 数据 JSON 注入 assets/report_template.html → 单文件 HTML 报告
 ```
 
-Supported inputs: CSV, Excel (.xlsx/.xls), JSON, TSV. A single input may carry **multiple datasets** — an Excel file with several sheets, two or more files handed over at once, or a JSON whose top level is a dict with multiple array keys; handle these via the Phase 1 multi-source intake (see `references/data-sources.md`). Analysis runs on Python (pandas etc.; if a dependency is missing, try pip install first, and fall back per the degradation table on failure).
+支持的输入：CSV、Excel（.xlsx/.xls）、JSON、TSV。**一份输入可能含多个数据集**——一个 Excel 有多个 sheet、一次给过来两个及以上文件、或 JSON 顶层是含多个数组键的 dict；这些走阶段 1 的多源接入（见 `references/data-sources.md`）。分析用 Python 执行（pandas 等；缺依赖先尝试 pip 安装，失败按降级表处理）。
 
-## First: Task Triage
+## 首先：任务分流
 
-| What the user is asking for | Path |
+| 用户要的是什么 | 走哪条路 |
 |------|------|
-| Open-ended analysis, wants a report/insights ("analyze this data", "give me a report") | **Full five-phase workflow** (including the Phase 1 gate), see below |
-| A single statistical question ("test whether B is significant", "compute the correlation between these two columns") | **Lightweight path**: run that computation directly and reply with the result + caveats; do not impose industry confirmation or the full report workflow |
+| 开放式分析，想要报告/洞察（「分析这份数据」「给我一份报告」） | **完整五阶段流程**（含阶段 1 门禁），见下文 |
+| 单个统计问题（「检验 B 方案是否显著」「算一下这两列的相关性」） | **轻量路径**：直接算出来，回复结果 + 注意事项；不强加行业确认，也不套完整报告流程 |
 
-Triage rule: the user names a specific statistical computation and does not ask for overall insights/a report → lightweight path. When in doubt, run the full workflow. **Statistical discipline applies equally to both paths.**
+分流判据：用户点名了具体的统计计算、且没有要整体洞察或报告 → 轻量路径。**拿不准就走完整流程。统计纪律对两条路径一视同仁。**
 
-## The Five-Phase Workflow
+## 五阶段流程
 
-At kickoff, immediately use the host's task-list tool (TodoWrite in Claude Code, update_plan in Codex, the equivalent plan/todo tool in other hosts) to create one todo per phase, advancing and updating status phase by phase. **If the host offers no such tool, list the five phases as a plain-text checklist up front and restate progress as you go** — phase tracking is never dropped just because the tool is missing. Phases 2–5 run straight through without interrupting the user with further questions; print a one-line progress note at the start of each phase.
+开工时立即用宿主的任务清单工具（Claude Code 用 TodoWrite、Codex 用 update_plan、其它宿主用各自等价的 plan/todo 工具）为每个阶段建一条 todo，逐阶段推进并更新状态。**宿主没有这类工具，就在开头列一份纯文本的五阶段清单，并在推进时逐次复述进度**——阶段追踪不因为工具缺失就丢掉。阶段 2–5 一气呵成，不再打断用户提问；每个阶段开始时打印一行进度提示。
 
-### Phase 1: Data Intake & Understanding [the only mandatory gate]
+### 阶段 1：数据接入与理解【唯一的强制门禁】
 
-1. Read the data and report a profile: row/column counts, field types, missingness, time range, distributions of key unique values
-2. **Industry identification**: infer the industry from field names, data characteristics, and the user's description, and self-assess confidence
-3. **Multi-source intake (when the input carries >1 dataset)**: an Excel file with several sheets, two or more files handed over at once, or a JSON whose top level is a dict with multiple array keys each count as multiple datasets. **Enumerate every source** (all sheet names / all files / all top-level keys), surface the full list to the user, and load `references/data-sources.md` for the read patterns and relation matrix. **Never silently read only the first sheet / the named file / collapse JSON keys** — that produces a report the user cannot tell is incomplete
-4. **User confirmation (mandatory gate)**: ask via structured multiple-choice questions — use the host's structured-questioning tool when it has one (e.g. AskUserQuestion in Claude Code); when the host has none, the tool is unavailable, or the user declines it, ask as numbered multiple-choice questions in plain text and **wait for the user's reply before continuing**. Only the presentation degrades — the gate itself never does. Bundle into the first round:
-   - Industry confirmation (high confidence → a single confirm option; low confidence or anonymized fields → offer 3–4 industry options, **never guess on your own**)
-   - Analysis goal (when the user hasn't made clear what they want to see)
-   - Report audience (executives = conclusion-led, light on jargon / analysts = keep the technical detail)
-   - Data-definition ambiguities (when field meanings, units, or reporting periods are unclear)
-   - **Multi-source relation strategy** (when step 3 applies): fusion (join/concat into one table) vs per-source independent analysis, plus the join keys
-5. Question budget: at most 3 rounds, at most 3 multiple-choice questions per round; aim to fit all questions for the whole workflow into a single round in this phase
+1. 读取数据并给出画像：行列数、字段类型、缺失情况、时间范围、关键字段的唯一值分布
+2. **行业识别**：从字段名、数据特征和用户描述推断所属行业，并自评置信度
+3. **多源接入（当输入含 >1 个数据集时）**：一个 Excel 有多个 sheet、一次给过来两个及以上文件、或 JSON 顶层是含多个数组键的 dict，都算多个数据集。**必须枚举出每一个数据源**（全部 sheet 名 / 全部文件 / 全部顶层键），把完整清单摆给用户看，并加载 `references/data-sources.md` 取读取模式与关系矩阵。**绝不允许只读第一个 sheet、只读用户点名的那个文件、或把 JSON 的多个键压成一个**——那会产出一份用户根本看不出它不完整的报告
+4. **用户确认（强制门禁）**：以结构化选择题提问——宿主有结构化提问工具就用（如 Claude Code 的 AskUserQuestion）；宿主没有、工具不可用、或用户拒绝使用时，改为纯文本编号选择题，并**等到用户回复后才继续**。**降级的只是呈现方式，门禁本身从不降级。** 第一轮里一次问完：
+   - 行业确认（置信度高 → 给一个确认选项即可；置信度低或字段被脱敏 → 给 3–4 个行业选项，**绝不自行猜定**）
+   - 分析目标（当用户没讲清想看什么时）
+   - 报告受众（高管 = 结论先行、少术语 / 分析师 = 保留技术细节）
+   - 数据口径歧义（当字段含义、单位或统计周期不清楚时）
+   - **多源关系策略**（当第 3 步适用时）：融合（join/concat 成一张表）还是各源独立分析，以及关联键是什么
+5. 提问预算：最多 3 轮，每轮最多 3 道选择题；目标是把整个流程所需的问题都压进本阶段的一轮里
 
-**When you may skip the questions and go straight to Phase 2**: industry, analysis goal, and audience can all be read directly from the user's input (e.g. "I'm the founder, this is 36 months of operating data for our SaaS — look at growth and retention"). As long as the industry has not been confirmed by the user, you must ask — **data that looks like retail ≠ the user confirming a retail reading**.
+**什么情况下可以免问直接进阶段 2**：行业、分析目标、受众三者都能从用户的输入里直接读出来（例如「我是创始人，这是我们 SaaS 三年的经营数据，看增长和留存」）。只要行业还没得到用户确认，就必须问——**数据看起来像零售 ≠ 用户确认了按零售解读**。
 
-**Why this gate cannot be skipped**: skipping confirmation means you have decided the analysis agenda, industry narrative, and audience style on the user's behalf. In baseline tests the model skipped the questions on the grounds that "delivering a full EDA first is the professional default; asking back would block the user" — and produced a neutral analysis the user may never have wanted. One round of multiple-choice costs the user tens of seconds; a report pointed in the wrong direction wastes the entire analysis. None of these excuses hold:
+**为什么这个门禁不能跳过**：跳过确认，等于你替用户定了分析议程、行业叙事和受众风格。基线测试里模型以「先交付完整 EDA 才是专业默认动作，反问会阻塞用户」为由跳过提问，产出了一份用户可能根本不想要的中性分析。一轮选择题只花用户几十秒；方向错了则整个分析全废。下面这些借口都不成立：
 
-| Excuse for skipping | Reality |
+| 跳过的借口 | 事实 |
 |------|------|
-| "Deliver value first; asking back blocks the user" | One round of multiple-choice ≪ one report pointed the wrong way. The gate is a hard requirement |
-| "Field semantics are clear, no confirmation needed" | Clear fields ≠ confirmed industry + clear goal. You don't set the agenda for the user |
-| "EDA doesn't depend on business semantics, just do it first" | EDA without industry and goal is a neutral pile of numbers — the opposite of this skill's core positioning |
-| "If the user catches an issue they can just tell me" | Confirmation must come first; correcting course after the report ships is the most expensive path |
+| 「先交付价值，反问会阻塞用户」 | 一轮选择题 ≪ 一份方向错的报告。门禁是硬要求 |
+| 「字段语义很清楚，不用确认」 | 字段清楚 ≠ 行业已确认 + 目标已明确。议程不由你替用户定 |
+| 「EDA 不依赖业务语义，先做了再说」 | 没有行业和目标的 EDA 就是一堆中性数字——恰恰站在本 skill 的核心定位的反面 |
+| 「用户发现问题自然会说」 | 确认必须前置；报告发出去之后再纠偏是代价最高的路 |
 
-Once confirmation lands, pick the industry template: a matching template exists (see table below) → load it; industry identifiable but no template → `industries/general.md` + inject industry terminology into the narrative; unidentifiable / user rejected the guess without naming one → `industries/general.md`, keep the narrative industry-neutral.
+确认落定后选行业模版：有对应模版（见下方映射表）→ 加载它；行业能识别但没有对应模版 → `industries/general.md` + 把行业术语注入叙事；识别不出 / 用户否掉了猜测又没点名行业 → `industries/general.md`，叙事保持行业中立。
 
-### Phase 2: Data Cleaning
+### 阶段 2：数据清洗
 
-- Missing values: choose drop/impute/flag based on the missing ratio and the nature of the field
-- Outliers: detect with IQR and Z-score; assess business plausibility before treating them (**anomalous ≠ wrong** — e.g. a big-promotion peak)
-- Deduplicate and standardize formats (dates, encodings, units)
-- **Traceability (mandatory)**: record every key cleaning decision and write it into the report appendix "Data Processing Notes"
-- **Terminating gate**: if data quality is too poor to support analysis (key fields largely missing / data is all garbage) → produce a data-quality diagnostic report (problems + repair suggestions), terminate the workflow, and do not force an analysis
+- 缺失值：按缺失比例和字段性质选择删除/填充/标记
+- 异常值：用 IQR 和 Z-score 检测；处理前先评估业务合理性（**异常 ≠ 错误**——比如大促当天的峰值）
+- 去重，统一格式（日期、编码、单位）
+- **可追溯（强制）**：记录每一个关键清洗决策，写进报告附录的「数据处理说明」
+- **终止型门禁**：数据质量差到支撑不了分析（关键字段大面积缺失 / 数据整体不可用）→ 产出一份数据质量诊断报告（问题 + 修复建议），终止流程，不硬做分析
 
-### Phase 3: Data Transformation
+### 阶段 3：数据转换
 
-- Compute derived metrics **using the industry template's KPI definitions first**; if a template metric's required fields are missing → skip the metric and say so in the report — never fabricate it
-- Pivot, aggregate, and reshape long/wide as the analysis themes require
-- Transformation logic also goes into "Data Processing Notes"
+- 计算派生指标时**优先采用行业模版里的 KPI 定义**；模版里某个指标所需字段缺失 → 跳过该指标并在报告里说明，绝不编造
+- 按分析主题做透视、聚合、长宽表重塑
+- 转换逻辑同样写进「数据处理说明」
 
-### Phase 4: Data Analysis
+### 阶段 4：数据分析
 
-- Run EDA by default: distributions, anomalies, correlations
-- **Organize the analysis agenda around the industry template's "typical analysis themes"**, going deep theme by theme
-- Load method modules as the task requires (see the "On-Demand Loading" table)
-- Follow statistical discipline throughout (see below)
+- 默认先做 EDA：分布、异常、相关性
+- **分析议程围绕行业模版的「典型分析主题」组织**，逐主题深入
+- 按任务需要加载方法模块（见「按需加载」表）
+- 全程遵守统计纪律（见下文）
 
-### Phase 5: Data Report
+### 阶段 5：数据报告
 
-1. **Required reading: `references/visualization.md`** — select chart types and generate ECharts options per its rules
-2. Organize the analysis results into the data JSON (six-section content + chart options + narrative text) and inject it into `assets/report_template.html` (data contract in the template's header comment), producing a **single-file HTML**
-3. The six-section structure is fixed by the template: Key Findings (3–5 items, conclusions first) → Background & Objectives → Data Overview → Deep-Dive Analysis (sectioned by industry themes) → Conclusions & Recommendations → Appendix: Data Processing Notes
-4. Every chart answers one explicit question; the `insight` field is required (what this shows, what it means for the decision)
-5. Narrative terminology and style follow the industry template and the confirmed audience
-6. **Report language follows the user**: a Chinese request gets a Chinese report; an English request with English data gets an English report
+1. **必读 `references/visualization.md`**——按它的规则选图表类型、生成 ECharts option
+2. 把分析结果组织成数据 JSON（六段式内容 + 图表 option + 叙事文字），注入 `assets/report_template.html`（数据契约见模板头部注释），产出**单文件 HTML**
+3. 六段式结构由模板固定：核心发现（3–5 条，结论先行）→ 分析背景与目标 → 数据概况 → 深入分析（按行业主题分节）→ 结论与建议 → 附录：数据处理说明
+4. 每张图回答一个明确的问题；`insight` 字段必填（这张图说明了什么、对决策意味着什么）
+5. 叙事术语和风格遵循行业模版与已确认的受众
+6. **报告语言跟随用户**：用户用中文提问就出中文报告；用户用英文提问且数据也是英文，就出英文报告
 
-**Do not hand-write your own HTML or stitch a report from matplotlib static images** — in baseline tests the model improvised a base64 static-image report: no interactivity, arbitrary structure, in breach of the delivery spec. The template already has interaction polished (ECharts zoom/hover/toolbox), pinned CDN versions, and Chinese fonts; you only inject data. matplotlib is for in-process exploration only, or when the user explicitly asks for static images/PDF.
+**不要自己手写 HTML，也不要用 matplotlib 静态图拼报告**——基线测试里模型即兴做了一份 base64 静态图报告：没有交互、结构随意，违反交付规范。模板已经把交互（ECharts 缩放/悬停/工具箱）、CDN 固定版本、中文字体都打磨好了，你只需注入数据。matplotlib 只用于分析过程中的探查，或用户明确要求静态图/PDF 时。
 
-## Statistical Discipline (globally mandatory, applies equally to both paths)
+## 统计纪律（全局强制，两条路径一视同仁）
 
-1. Statistical tests must report p-values and confidence intervals, and check their assumptions
-2. Phrase correlation findings cautiously and proactively name confounders visible in the data; without causal-method validation, never use "boosted/caused/drove" language (see the phrasing table in `references/causal-inference.md`)
-3. When the sample is too small, state the statistical-power limitation explicitly — **do not force a verdict because the user is pressing ("the boss needs the answer today")**
-4. **Industry-benchmark discipline**: benchmark comparisons appear in exactly two cases — (a) the user supplied benchmark data; (b) the user **explicitly authorized** web search and results are cited with sources. With neither: do internal comparisons only, and note in the reply "for industry benchmarking, please provide benchmark data or authorize me to search the web (results would be directional reference only)". **Never quote industry averages from memory; never search the web without authorization** — in baseline tests the model searched and cited external data on its own; even with sources attributed, this violates the authorization requirement: whether to search, and which sources to lean on, is the user's call
-5. **No silent multi-source loss**: when the input carries multiple datasets (multi-sheet Excel / multiple files / multi-key JSON), enumerate every source, surface the full list to the user, and confirm the relation strategy — **never silently read only the first sheet / the named file / collapse JSON keys** (see `references/data-sources.md`). This extends the template's "no silent truncation" rule from the output layer to the input layer
+1. 统计检验必须报告 p 值和置信区间，并检查其前提假设
+2. 相关性结论措辞要审慎，主动点出数据里可见的混淆因素；没有因果方法验证过，绝不使用「提升了/导致了/带动了」这类措辞（措辞对照表见 `references/causal-inference.md`）
+3. 样本量太小时明确说明统计功效的局限——**不要因为用户在催（「老板今天就要结论」）就硬给判断**
+4. **行业基准纪律**：基准对比只在两种情况下出现——（a）用户提供了基准数据；（b）用户**明确授权**联网搜索，且结果标注了来源。两者都没有：只做内部对比，并在回复里说明「如需行业基准对比，请提供基准数据或授权我联网搜索（搜到的结果仅供方向性参考）」。**绝不凭记忆引用行业均值，绝不未经授权就联网搜索**——基线测试里模型自行搜索并引用了外部数据；即便标注了来源，这也违反授权要求：搜不搜、信哪个来源，是用户的决定
+5. **多源不得静默丢失**：输入含多个数据集（多 sheet Excel / 多文件 / 多键 JSON）时，必须枚举每一个源、把完整清单摆给用户、并确认关系策略——**绝不允许只读第一个 sheet、只读点名的文件、或压掉 JSON 的键**（见 `references/data-sources.md`）。这是把模板的「不得静默截断」从输出层延伸到输入层
 
-## On-Demand Loading
+## 按需加载
 
-| File | When to load |
+| 文件 | 何时加载 |
 |------|------|
-| `industries/retail.md` | Confirmed retail / e-commerce |
-| `industries/saas.md` | Confirmed internet / SaaS / subscription business |
-| `industries/self-media.md` | Confirmed self-media / content-creator account operations |
-| `industries/corporate-finance.md` | Confirmed corporate finance / FP&A (P&L, expenses, budget, cash-flow analysis) |
-| `industries/fund.md` | Confirmed fund industry (fund NAV performance, AUM & subscription/redemption, holder analysis) |
-| `industries/real-estate.md` | Confirmed real estate (project sales & absorption, cash collection, market volume-price trends) |
-| `industries/construction.md` | Confirmed construction (project output & progress, labor/material/machinery costs, contract intake & collections) |
-| `industries/education.md` | Confirmed education & training (enrollment & renewals, attendance & completion, channel acquisition) |
-| `industries/general.md` | Industry unidentified / uncovered / user rejected the guess (fallback) |
-| `references/data-sources.md` | The input carries multiple datasets — multi-sheet Excel, multiple files, or multi-key JSON |
-| `references/visualization.md` | Phases 4–5 whenever charts are produced (required in Phase 5) |
-| `references/ab-testing.md` | User mentions experiments, control groups, A/B tests |
-| `references/causal-inference.md` | User asks "did X cause Y" or wants causal conclusions |
-| `references/time-series.md` | Data has a time dimension and trends/forecasts are needed |
-| `references/machine-learning.md` | Modeling, classification, clustering, or prediction tasks |
+| `industries/retail.md` | 确认为零售 / 电商 |
+| `industries/saas.md` | 确认为互联网 / SaaS / 订阅制业务 |
+| `industries/self-media.md` | 确认为自媒体 / 内容创作者账号运营 |
+| `industries/corporate-finance.md` | 确认为企业财务 / FP&A（损益、费用、预算、现金流分析） |
+| `industries/fund.md` | 确认为基金行业（基金净值表现、规模与申赎、持有人分析） |
+| `industries/real-estate.md` | 确认为房地产（项目销售与去化、回款、市场量价走势） |
+| `industries/construction.md` | 确认为建筑施工（项目产值与进度、人材机成本、合同承接与回款） |
+| `industries/education.md` | 确认为教育培训（招生与续报、出勤与完课、渠道获客） |
+| `industries/general.md` | 行业识别不出 / 无对应模版 / 用户否掉了猜测（兜底） |
+| `references/data-sources.md` | 输入含多个数据集——多 sheet Excel、多文件、或多键 JSON |
+| `references/visualization.md` | 阶段 4–5 只要出图就加载（阶段 5 必读） |
+| `references/ab-testing.md` | 用户提到实验、对照组、A/B 测试 |
+| `references/causal-inference.md` | 用户问「X 是否导致了 Y」或想要因果结论 |
+| `references/time-series.md` | 数据有时间维度且需要趋势/预测 |
+| `references/machine-learning.md` | 建模、分类、聚类或预测类任务 |
 
-Industry templates are a thin layer: they change analysis focus and narrative style only — they never replace the five-phase workflow or statistical discipline.
+行业模版是薄层：**只调整分析重点与叙事风格，绝不替换五阶段流程或统计纪律。**
 
-## Degradation Paths
+## 降级路径
 
-| Situation | Behavior |
+| 情况 | 行为 |
 |------|------|
-| Data quality too poor | Diagnostic report + repair suggestions, terminate (see Phase 2) |
-| Sample too small for statistical testing | Descriptive analysis + statistical-power caveat |
-| Goal still unclear after 3 rounds of questions | Produce a standard EDA report from data characteristics, declaring assumptions upfront |
-| Environment cannot interact (any non-interactive mode, e.g. `codex exec` / `claude -p`) | Treat as "goal still unclear after 3 rounds": standard EDA report + general industry fallback + assumptions declared upfront |
-| Host lacks a task-list tool or a structured-questioning tool | Degrade the presentation only — plain-text phase checklist / numbered plain-text multiple-choice, then wait for the reply. The Phase 1 gate and the five-phase workflow stay intact |
-| Low confidence in industry identification | Offer 3–4 industry options; don't guess |
-| Industry identifiable but no template | general.md + industry terminology injected into the narrative |
-| User rejects the identification without naming an industry | general.md, industry-neutral narrative |
-| Data doesn't meet causal-inference prerequisites | Correlation conclusions only + the data conditions that would be needed |
-| Too few time-series points | No forecasting; trend description only, with the reason stated |
-| No usable industry benchmark | Internal comparisons only; never fabricate external benchmarks |
-| Chart data volume too large | Aggregate/sample before injecting into HTML; note the granularity in the appendix (rules in visualization.md) |
-| Python dependency missing | Notify and attempt pip install; on failure degrade (without statsmodels do trend description only; without scikit-learn skip modeling and say so) |
-| Multi-source relation key missing / cannot fuse | Analyze each source independently; state this and explain why fusion isn't possible |
-| Multi-source schemas/structures incompatible | Surface the conflict to the user; degrade to single-source or request clarification |
+| 数据质量太差 | 诊断报告 + 修复建议，终止（见阶段 2） |
+| 样本太小做不了统计检验 | 描述性分析 + 统计功效局限说明 |
+| 问了 3 轮目标仍不明确 | 按数据特征产出标准 EDA 报告，开头声明所做假设 |
+| 环境无法交互（任何非交互模式，如 `codex exec` / `claude -p`） | 按「问了 3 轮仍不明确」处理：标准 EDA 报告 + general 行业兜底 + 开头声明假设 |
+| 宿主缺任务清单工具或结构化提问工具 | **只降级呈现方式**——纯文本阶段清单 / 纯文本编号选择题，然后等回复。阶段 1 门禁与五阶段流程原样保留 |
+| 行业识别置信度低 | 给 3–4 个行业选项，不猜 |
+| 行业能识别但没有对应模版 | general.md + 行业术语注入叙事 |
+| 用户否掉识别结果又不点名行业 | general.md，叙事保持行业中立 |
+| 数据不满足因果推断前提 | 只给相关性结论 + 说明需要什么样的数据条件 |
+| 时间序列点数太少 | 不做预测，只做趋势描述，并说明原因 |
+| 没有可用的行业基准 | 只做内部对比，绝不编造外部基准 |
+| 图表数据量过大 | 先聚合/采样再注入 HTML，并在附录注明粒度（规则见 visualization.md） |
+| Python 依赖缺失 | 告知并尝试 pip 安装；失败则降级（没有 statsmodels 就只做趋势描述；没有 scikit-learn 就跳过建模并说明） |
+| 多源关联键缺失 / 无法融合 | 各源独立分析，说明这一点并解释为什么融合不了 |
+| 多源的 schema/结构不兼容 | 把冲突摆给用户；降级为单源或请用户澄清 |
 
-## Red Flags — stop the moment you catch these thoughts
+## 危险信号（Red Flags）——冒出这些念头立刻停
 
-- "The data is clear enough, no need to ask about industry" → back to the Phase 1 gate
-- "Let me just run an analysis and show the user first" → back to the Phase 1 gate
-- "The industry average is roughly X%, common knowledge" → violates benchmark discipline, delete it
-- "Let me quickly search for industry benchmarks" → no search without authorization; ask first
-- "The sample is small but the trend is obvious, the conclusion should be fine" → report the power limitation
-- "With correlation this strong, 'boosted' isn't an overreach" → check the phrasing table
-- "I'd structure the report better myself" → use the template's six sections
-- "matplotlib charts embedded in HTML are just as good" → use ECharts + the template
-- "The first sheet is enough, let me just read it" / "I'll process the file the user named" → multi-source silent-loss red line: enumerate every source, surface the list, confirm strategy (Phase 1 step 3 + `references/data-sources.md`)
+- 「数据够清楚了，不用问行业」 → 回阶段 1 门禁
+- 「先跑个分析给用户看看」 → 回阶段 1 门禁
+- 「行业均值大概是 X%，这是常识」 → 违反基准纪律，删掉
+- 「我快速搜一下行业基准」 → 未经授权不得搜索，先问
+- 「样本小但趋势很明显，结论应该没问题」 → 报告统计功效局限
+- 「相关性都这么强了，说『提升了』不算过」 → 查措辞对照表
+- 「我自己组织报告结构会更好」 → 用模板的六段式
+- 「matplotlib 图嵌进 HTML 也一样」 → 用 ECharts + 模板
+- 「第一个 sheet 就够了，读它就行」/「用户点名了哪个文件我就处理哪个」 → 触碰多源静默丢失红线：枚举每一个源、摆出清单、确认策略（阶段 1 第 3 步 + `references/data-sources.md`）
 
-## Pre-Completion Checklist
+## 完成前自检清单
 
-- [ ] Industry confirmed by the user (or the right degradation path was taken)
-- [ ] Report opens with 3–5 key findings, conclusions first
-- [ ] Industry metrics computed per template definitions; metrics with missing fields are explained, not fabricated
-- [ ] Every chart answers an explicit question and carries an interpretation
-- [ ] Tests report p-values/confidence intervals; no causal language without causal methods
-- [ ] No unsourced industry benchmark figures in the report
-- [ ] Appendix contains complete "Data Processing Notes"
-- [ ] Single-file HTML; ECharts loaded from a pinned-version CDN; interactive when opened with network access
-- [ ] Report language matches the user's language; narrative style matches the audience
-- [ ] If the input had multiple datasets (sheets/files/JSON keys), all sources were enumerated and the relation strategy confirmed or explained — none silently dropped
+- [ ] 行业已由用户确认（或走了正确的降级路径）
+- [ ] 报告开篇是 3–5 条核心发现，结论先行
+- [ ] 行业指标按模版定义计算；字段缺失的指标已说明，而非编造
+- [ ] 每张图回答一个明确问题，且配有解读
+- [ ] 检验报告了 p 值/置信区间；没有因果方法就没有因果措辞
+- [ ] 报告里没有无来源的行业基准数字
+- [ ] 附录含完整的「数据处理说明」
+- [ ] 单文件 HTML；ECharts 走固定版本 CDN；联网打开时交互正常
+- [ ] 报告语言与用户语言一致；叙事风格与受众匹配
+- [ ] 若输入含多个数据集（sheet/文件/JSON 键），所有源都已枚举、关系策略已确认或已说明——没有任何一个被静默丢弃

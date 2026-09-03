@@ -1,32 +1,32 @@
-# A/B Testing & Experiment Analysis
+# A/B 测试与实验分析
 
-Load when the user mentions experiments, control groups, A/B tests, or version comparisons.
+当用户提到实验、对照组、A/B 测试或版本对比时加载。
 
-## Pre-Analysis Checks (run in order; report problems before analyzing)
+## 分析前的检查（按顺序做；发现问题先报告，再分析）
 
-1. **Randomization**: was assignment random? Non-random assignment (self-selection, time-sliced) supports observational comparison only — downgrade the conclusions
-2. **SRM check** (Sample Ratio Mismatch): chi-square test of the actual split ratio against the designed ratio; p < 0.01 means the split is broken and results are untrustworthy — report this problem first
-3. **Sample size & power**: compute current power before testing (see below); power < 0.5 → state plainly "this experiment most likely cannot detect a real difference"
-4. **Metric definitions**: the conversion denominator (impressions/clicks/visits) must be confirmed with the user
+1. **随机化**：分组是随机的吗？非随机分配（自选择、按时间切分）只支持观察性对比——结论要降级
+2. **SRM 检查**（样本比例失配）：用卡方检验比对实际分流比与设计分流比；p < 0.01 说明分流坏了、结果不可信——这个问题要优先报告
+3. **样本量与功效**：检验前先算当前功效（见下文）；功效 < 0.5 时直接说明「本实验大概率检测不出真实差异」
+4. **指标定义**：转化率的分母（曝光/点击/访问）必须与用户确认
 
-## Choosing the Test
+## 检验方法的选择
 
-| Metric type | Default method | Small sample (any expected cell < 5) |
+| 指标类型 | 默认方法 | 小样本（任一期望频数 < 5） |
 |------|------|------|
-| Conversion rate (binary) | Two-proportion z-test | Fisher's exact test |
-| Mean (continuous) | Welch's t-test (no equal-variance assumption) | Mann-Whitney U |
-| Counts | Poisson / negative-binomial comparison | Permutation test |
+| 转化率（二元） | 双比例 z 检验 | Fisher 精确检验 |
+| 均值（连续） | Welch t 检验（不假设方差齐性） | Mann-Whitney U |
+| 计数 | 泊松 / 负二项对比 | 置换检验 |
 
-Reports must include: p-value, effect size (absolute difference and relative lift), 95% confidence interval. When the interval spans 0, say explicitly "no difference cannot be ruled out".
+报告必须包含：p 值、效应量（绝对差与相对提升）、95% 置信区间。区间跨 0 时明确说明「不能排除无差异」。
 
-## Sample-Size Calculation (when the user asks "how long / how many users")
+## 样本量计算（当用户问「要跑多久 / 要多少用户」时）
 
 ```python
 from scipy import stats
 import math
 
 def sample_size_per_group(p_base, mde_abs, alpha=0.05, power=0.8):
-    """Per-group sample size for a two-proportion test. p_base: baseline conversion rate; mde_abs: minimum detectable absolute lift."""
+    """双比例检验的每组样本量。p_base：基线转化率；mde_abs：最小可检测的绝对提升。"""
     p2 = p_base + mde_abs
     p_bar = (p_base + p2) / 2
     za, zb = stats.norm.ppf(1 - alpha / 2), stats.norm.ppf(power)
@@ -34,15 +34,15 @@ def sample_size_per_group(p_base, mde_abs, alpha=0.05, power=0.8):
     return math.ceil(n)
 ```
 
-## Common Pitfalls (flag proactively in the report)
+## 常见陷阱（要在报告里主动提示）
 
-- **Peeking**: checking significance and stopping before the planned sample size inflates the false-positive rate. If the user's data is a mid-experiment snapshot, flag this risk
-- **Multiple comparisons**: when testing several metrics/groups at once, apply Bonferroni or BH correction to the decision metrics, or separate "primary metrics" from "observational metrics"
-- **Simpson's paradox**: overall and stratified conclusions can flip; pivot by important dimensions (new vs existing users, platform)
-- **Novelty effect**: early-launch lift may decay over time; for short experiments flag the extrapolation risk
+- **偷看（peeking）**：没到计划样本量就反复看显著性并提前停止，会抬高假阳性率。如果用户的数据是实验中途的快照，要提示这个风险
+- **多重比较**：同时检验多个指标/分组时，对决策指标做 Bonferroni 或 BH 校正，或者把「主指标」与「观察指标」分开
+- **辛普森悖论**：整体结论与分层结论可能相反；按重要维度（新老用户、平台）做透视
+- **新奇效应**：上线初期的提升可能随时间衰减；短周期实验要提示外推风险
 
-## Conclusion Phrasing
+## 结论措辞
 
-- Significant with adequate power: "B significantly outperforms A at α=0.05 (p=…, lift …, 95% CI …)"
-- Not significant: "No significant difference detected (p=…); at the current sample size this experiment can only reliably detect lifts of ≥ …" — give the minimum detectable effect, never just "not significant"
-- Underpowered: state plainly "the sample size cannot support a reliable conclusion", give the required sample size, and **never declare a winner because the user is pressing**
+- 显著且功效充足：「在 α=0.05 下 B 显著优于 A（p=…，提升 …，95% CI …）」
+- 不显著：「未检测到显著差异（p=…）；在当前样本量下，本实验只能可靠检测出 ≥ … 的提升」——要给出最小可检测效应，绝不只说一句「不显著」
+- 功效不足：直接说明「样本量不足以支撑可靠结论」，给出所需样本量，并且**绝不因为用户在催就宣布赢家**

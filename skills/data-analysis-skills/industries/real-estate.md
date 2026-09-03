@@ -1,34 +1,34 @@
-# Real Estate Industry Analysis Template
+# 房地产行业分析模版
 
-Scope: property developers (marketing / investment strategy / operations), agencies, and market researchers analyzing real-estate sales and market data — project sales & absorption, cash collection, market volume-price. Identification signals: fields such as purchase commitment / contract signing / online filing (认购/签约/网签), units (套数), floor area (面积), absorption rate (去化率), cash collection (回款), average/total price (均价/总价), building / unit type / listing (楼栋/户型/房源), sales office / walk-ins / intent deposits (案场/来访/认筹), city/submarket transaction volume-price (城市/板块成交量价), sellable inventory / months of inventory (可售库存/去化周期), or developer/project/homebuying descriptions. Routing: the developer's own P&L/expense/budget analysis → corporate-finance.md; brokerage business (listings & leads, showings, commissions) and rental operations (occupancy, rent, NOI) → general.md for now; when hard to tell, confirm with the user.
+适用范围：房企（营销/投资拓展/运营）、代理机构、市场研究岗分析地产销售与市场数据——项目销售与去化、回款、市场量价。识别信号：认购/签约/网签、套数、面积、去化率、回款、均价/总价、楼栋/户型/房源、案场/来访/认筹、城市/板块成交量价、可售库存/去化周期等字段，或来自开发商/项目/购房的描述。分流：房企自身的损益/费用/预算分析 → corporate-finance.md；中介经纪业务（房源与线索、带看、佣金）和租赁运营（出租率、租金、NOI）→ 暂走 general.md；不好判断时向用户确认。
 
-## KPI System (KPI Dictionary & Definitions)
+## KPI 体系（KPI 词典与定义）
 
-| KPI | Definition | Points to confirm |
+| KPI | 定义 | 需确认的点 |
 |------|------|------|
-| Contracted amount / units / area | Aggregate by contract-signing date | **Purchase commitment (认购) ≠ contract signing (签约) ≠ online filing (网签) ≠ cash collection (回款)** — the four definitions differ widely; confirm which one the data uses first. Commitment-based data carries cancellation risk — conclusions must note it |
-| Absorption rate | Cumulative units (or area) absorbed / total sellable units (or area) | Whether the denominator is **the current launch batch or the whole sellable project** changes results a lot — declare it; when unit- and area-based views coexist, report each |
-| Average selling price (ASP) | Contracted amount / contracted area | **ASP movement ≠ unit-price movement** — it may be a mix shift (product type / building / unit-type composition); decompose the mix before concluding |
-| Collection rate | Cumulative cash collected / cumulative contracted amount | **Requires collection data**; current-period collections include lagged collections from prior signings — declare the window definition |
-| Months of inventory | Current sellable inventory / average monthly absorption over the last N months | **Requires inventory data**; declare the averaging window (sensitive to seasonality and launch cadence) |
-| Walk-in-to-commitment conversion | Committing groups / walk-in groups | **Requires sales-office walk-in data**; distinguish organic walk-ins from channel-referred visits |
-| Market volume & price | Transacted units/area, average transaction price, YoY/MoM | **Requires market data**; MoM is distorted by seasonal factors such as Chinese New Year — lead with YoY; citywide ASP is also mix-affected |
-| Supply-demand ratio | Approved-for-sale area / transacted area | **Requires supply data**; skip if missing |
+| 签约金额 / 套数 / 面积 | 按签约日期汇总 | **认购 ≠ 签约 ≠ 网签 ≠ 回款**——四个口径差异极大，先确认数据用的是哪一个。认购口径带退房风险，结论必须注明 |
+| 去化率 | 累计去化套数（或面积）/ 总可售套数（或面积） | 分母是**本批次推售**还是**全项目可售**，结果差很多——必须声明；套数口径与面积口径并存时分别报告 |
+| 成交均价 | 签约金额 / 签约面积 | **均价变动 ≠ 单价变动**——可能是产品类型/楼栋/户型的结构变化；下结论前先做结构拆解 |
+| 回款率 | 累计回款 / 累计签约金额 | **需要回款数据**；当期回款含前期签约的滞后回款——需声明窗口口径 |
+| 去化周期 | 当前可售库存 / 近 N 月月均去化 | **需要库存数据**；需声明取均窗口（对季节性和推盘节奏敏感） |
+| 来访转认购率 | 认购组数 / 来访组数 | **需要案场来访数据**；区分自然来访与渠道带访 |
+| 市场量价 | 成交套数/面积、成交均价、同比/环比 | **需要市场数据**；环比受春节等季节因素扭曲——以同比为主；城市均价同样受结构影响 |
+| 供求比 | 批准上市面积 / 成交面积 | **需要供应数据**；缺失则跳过 |
 
-Metrics with missing fields: skip them and state in the report "the data does not include X, so Y was not computed" — never fabricate. Project-vs-market comparisons must align periods and definitions first.
+字段缺失的指标：跳过，并在报告里写明「数据不含 X，因此未计算 Y」——绝不编造。项目与市场对比前必须先对齐区间与口径。
 
-## Typical Analysis Themes
+## 典型分析主题
 
-1. **Sales & absorption panorama**: contracted amount/units trajectory + absorption progress + ASP trend; **a signing surge must be split into launch cadence vs demand change** — peaks created by batched online filings or concentrated launches do not signal warming demand
-2. **Volume-price mix decomposition**: sales velocity and price differences across product types / buildings / unit types / area bands (Pareto: which unit types carry the velocity); decompose ASP movement into mix change vs unit-price change
-3. **Collection vs signing gap** (requires collection data): signing and collection trajectories with the collection-rate trend; when the gap widens, flag cash-collection pacing for attention — phrase cautiously
-4. **Sales-office conversion funnel** (requires walk-in data): stage conversion from walk-in → intent deposit → commitment → signing; channel-source comparison (organic vs channel-referred)
-5. **Market conditions & months of inventory** (requires market data): market volume-price trends, inventory and months-of-inventory shifts; project absorption set against the market over the same period
+1. **销售与去化全景**：签约金额/套数轨迹 + 去化进度 + 均价趋势；**签约放量必须拆成推盘节奏 vs 需求变化**——集中网签或集中推盘造出来的峰值不代表需求转暖
+2. **量价结构拆解**：不同产品类型/楼栋/户型/面积段的流速与价格差异（帕累托：哪些户型扛起了流速）；把均价变动拆解为结构变化与单价变化
+3. **回款与签约的缺口**（需要回款数据）：签约与回款双轨迹配回款率趋势；缺口扩大时提示关注回款节奏——措辞要审慎
+4. **案场转化漏斗**（需要来访数据）：来访 → 认筹 → 认购 → 签约的分阶段转化；渠道来源对比（自然 vs 渠道带访）
+5. **市场行情与去化周期**（需要市场数据）：市场量价走势、库存与去化周期变化；把项目去化放到同期市场里对照
 
-## Narrative Language
+## 叙事语言
 
-Absorption (去化), sales velocity (流速), launch (推盘/推售), sellable value (可售货值), contract signing (签约), online filing (网签), cash collection (回款), sales office (案场), intent deposit (认筹). Audience tiers: developer executives (sellable-value and collection oriented, conclusions first); marketing line (walk-in conversion, channel and pricing detail); research / investment strategy (volume-price and months of inventory, definition detail). Phrasing discipline: "absorption accelerated after the price cut", not "the price cut drove absorption"; "transactions rebounded after the policy came out", not "the policy stimulated transactions" (policy attribution is real estate's classic causal-language trap); **never quote from memory any months-of-inventory health threshold (e.g. "under 12 months is healthy") or city/competitor rankings** — enforce benchmark discipline strictly (user-provided, or authorized search with cited sources); commitment-based conclusions must note cancellation risk.
+去化、流速、推盘/推售、可售货值、签约、网签、回款、案场、认筹。受众分层：房企高管（关注货值与回款，结论先行）；营销条线（来访转化、渠道与价格细节）；研究/投拓（量价与去化周期，保留定义细节）。措辞纪律：说「降价后去化提速」，不说「降价带动了去化」；说「政策出台后成交回升」，不说「政策刺激了成交」（政策归因是地产最典型的因果措辞陷阱）；**绝不凭记忆引用去化周期健康阈值（如「12 个月以内算健康」）或城市/竞品排名**——基准纪律严格执行（用户提供，或授权搜索并标注来源）；认购口径的结论必须注明退房风险。
 
-## Report Section Emphasis
+## 报告分节侧重
 
-Deep-dive priority: sales & absorption panorama (always) → volume-price mix decomposition (always) → collection vs signing gap (requires data) → sales-office funnel (requires data) → market conditions (requires data). Go-to charts: contracted-amount bars + absorption-rate line on dual axes, ASP trend line, product/unit-type mix stacked bars or Pareto, sales-office funnel chart, market volume-price dual-axis lines. All within ECharts 5.4.3 pure-JSON capability.
+深入分析优先级：销售与去化全景（必做）→ 量价结构拆解（必做）→ 回款与签约缺口（需要数据）→ 案场漏斗（需要数据）→ 市场行情（需要数据）。常用图表：签约金额柱 + 去化率折线双轴、均价趋势折线、产品/户型结构堆叠柱或帕累托、案场漏斗图、市场量价双轴折线。全部控制在 ECharts 5.4.3 的纯 JSON 能力范围内。

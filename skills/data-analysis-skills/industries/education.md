@@ -1,37 +1,37 @@
-# Education & Training Industry Analysis Template
+# 教育培训行业分析模版
 
-Scope: education & training institutions (K12 enrichment/academic tutoring, adult vocational & certification training, language/study-abroad training, hobby classes) and online education platforms (live/recorded courses, paid knowledge products) analyzing institutional operating data — enrollment & payments, attendance & course completion, renewals & refunds, class-hour consumption, academic outcomes, channel acquisition. Identification signals: fields such as enrollment/payment (报名/缴费), renewal/refund (续费/退费), class hours / consumption (课时/课消), attendance / show-up (出勤/到课), completion (完课), trial class / conversion (试听/转化), student/class/campus (学员/班级/校区), course/subject (课程/科目), scores / improvement (成绩/提分), CAC / channel (获客成本/渠道), teacher / class advisor (老师/班主任), or descriptions from training institutions / online schools / tutoring businesses. Routing: the institution's own P&L/expense/budget analysis (account dimension) → corporate-finance.md; education content-creator account data (views, engagement, follower growth) → self-media.md; pure subscription education tools (MRR/DAU shape, e.g. a quiz-bank app) → saas.md; public school / university academic-affairs data (grades and attendance with no acquisition/renewal concepts) → general.md for now; when hard to tell, confirm with the user.
+适用范围：教育培训机构（K12 素质/学科辅导、成人职业与考证培训、语言/留学培训、兴趣班）和在线教育平台（直播/录播课、知识付费）分析机构经营数据——报名与缴费、出勤与完课、续费与退费、课时消耗、学业成果、渠道获客。识别信号：报名/缴费、续费/退费、课时/课消、出勤/到课、完课、试听/转化、学员/班级/校区、课程/科目、成绩/提分、获客成本/渠道、老师/班主任等字段，或来自培训机构/网校/辅导业务的描述。分流：机构自身的损益/费用/预算分析（科目维度）→ corporate-finance.md；教育类内容账号数据（播放、互动、涨粉）→ self-media.md；纯订阅制教育工具（MRR/DAU 形态，如题库 App）→ saas.md；公立学校/高校教务数据（只有成绩与考勤，没有获客与续费概念）→ 暂走 general.md；不好判断时向用户确认。
 
-## KPI System (KPI Dictionary & Definitions)
+## KPI 体系（KPI 词典与定义）
 
-| KPI | Definition | Points to confirm |
+| KPI | 定义 | 需确认的点 |
 |------|------|------|
-| Renewal rate | Renewed students (or amount) / students due for renewal | **The highest-risk definition in education** — by headcount or by amount? Is the denominator students due for renewal or all active students? The renewal window (within N days of expiry) must be declared |
-| Refund rate | Refunds / denominator | Denominator (enrollments / active students / payment amount) must be declared; refunds lag from request to completion |
-| Attendance / show-up rate | Attended sessions / scheduled sessions | Offline attendance vs live-class show-up vs recorded-course viewing are different definitions; per-session or per-student must be declared |
-| Completion rate | Students completing / students enrolled | The completion definition must be declared (viewing-percentage threshold vs finishing all sessions; recorded and live courses differ) |
-| Class-hour consumption | Consumed class hours / sold class hours | **Requires class-hour data**; remaining class hours are deferred-revenue liabilities — the key to institutional cash-flow health |
-| Customer acquisition cost (CAC) | Channel spend / acquisitions | **Requires channel/spend data**; whether the denominator is leads, trials, or full-price enrollments changes results hugely — declare it; attribution method (first/last touch) must be declared |
-| Trial conversion rate | Full-price enrollments / trials | **Requires funnel data**; align stage definitions across leads → trials → enrollments first |
-| AOV / student LTV | Payment per enrollment; lifetime value incl. renewals & cross-sell | Single-enrollment order value vs lifetime value including renewals and cross-sell (扩科) must be distinguished and declared |
-| Scores / improvement | Aggregate by period/cohort | **Requires score data**; compare within the same exam system and scale only; **never attribute score gains directly to the course** (selection bias — enrolled students differ in motivation and baseline) |
-| Class-fill rate | Actual class size / class capacity | **Requires scheduling data**; capacity-utilization metric for offline institutions |
+| 续费率 | 续费学员（或金额）/ 应续学员 | **教育行业口径风险最高的指标**——按人数还是按金额？分母是应续学员还是全部在读？续费窗口（到期后 N 天内）必须声明 |
+| 退费率 | 退费 / 分母 | 分母（报名数 / 在读学员 / 缴费金额）必须声明；退费从申请到完成有滞后 |
+| 出勤 / 到课率 | 出勤课次 / 应到课次 | 线下出勤、直播到课、录播观看是三套不同定义；按课次还是按学员必须声明 |
+| 完课率 | 完课学员 / 报名学员 | 完课定义必须声明（观看百分比阈值 vs 上完全部课次；录播与直播不同） |
+| 课时消耗 | 已消耗课时 / 已售课时 | **需要课时数据**；剩余课时是预收负债——机构现金流健康度的关键 |
+| 获客成本（CAC） | 渠道投入 / 获客数 | **需要渠道/投放数据**；分母是线索、试听还是正价报名，结果差异巨大——必须声明；归因方式（首次/末次触点）必须声明 |
+| 试听转化率 | 正价报名 / 试听 | **需要漏斗数据**；先对齐线索 → 试听 → 报名的阶段定义 |
+| 客单价 / 学员 LTV | 每次报名的缴费额；含续费与扩科的终身价值 | 单次报名客单价与含续费扩科的终身价值必须区分并声明 |
+| 成绩 / 提分 | 按期间/班级汇总 | **需要成绩数据**；只在同一考试体系与同一满分标准内比较；**绝不把成绩提升直接归因于课程**（选择性偏差——报名学员的学习动机与基础本就不同） |
+| 满班率 | 实际班容 / 计划班容 | **需要排课数据**；线下机构的产能利用率指标 |
 
-Metrics with missing fields: skip them and state in the report "the data does not include X, so Y was not computed" — never fabricate. Cross-course/campus comparisons must align course types and pricing bases first.
+字段缺失的指标：跳过，并在报告里写明「数据不含 X，因此未计算 Y」——绝不编造。跨课程/校区对比前必须先对齐课程类型与价格基础。
 
-## Typical Analysis Themes
+## 典型分析主题
 
-1. **Enrollment panorama**: enrollment trajectory + channel/course mix; **seasonal peaks from summer/winter intensives, back-to-school, and exam seasons must be separated from real growth** — education is a strongly seasonal industry
-2. **Student retention & renewal** (core theme): renewal-rate trajectory, renewal tiering by course/grade/teacher/campus, refund analysis and reason structure
-3. **Conversion funnel & channel acquisition** (requires channel data): leads → trial → enrollment funnel, channel comparison (volume / conversion / CAC), campaign effectiveness
-4. **Learning behavior & teaching outcomes** (requires behavior/score data): the **association** between attendance/completion and renewal (correlation, not causation), score distributions and improvements; phrase teacher/class comparisons cautiously — student intake composition differs
-5. **Class-hour consumption & operating health** (requires class-hour data): consumption trajectory, remaining class-hour stock, the gap between prepayments and consumption as a cash-flow early warning — phrase cautiously
-6. **Course/campus structure & capacity**: enrollment and revenue Pareto by course/subject/campus, class-fill rate
+1. **招生全景**：报名轨迹 + 渠道/课程结构；**寒暑假集训、开学季、考试季造成的季节性峰值必须与真实增长区分开**——教育是强季节性行业
+2. **学员留存与续费**（核心主题）：续费率轨迹、按课程/年级/老师/校区的续费分层、退费分析与原因结构
+3. **转化漏斗与渠道获客**（需要渠道数据）：线索 → 试听 → 报名漏斗、渠道对比（量 / 转化 / CAC）、活动效果
+4. **学习行为与教学成果**（需要行为/成绩数据）：出勤/完课与续费的**关联**（相关，不是因果）、成绩分布与提分情况；老师/班级对比措辞要审慎——生源构成本就不同
+5. **课消与经营健康**（需要课时数据）：课消轨迹、剩余课时存量、预收与课消的缺口作为现金流预警——措辞要审慎
+6. **课程/校区结构与产能**：按课程/科目/校区的报名与收入帕累托、满班率
 
-## Narrative Language
+## 叙事语言
 
-Full-price course / intro course (正价课/引流课), referral (转介绍), renewal / cross-sell (续费/扩科), refund (退费), class-hour consumption (课消), class-fill rate (满班率), show-up (到课), completion (完课), score improvement (提分), summer/winter intensive & spring/autumn term (寒暑假班/春秋季班), dual-teacher model (双师), OMO, private-domain traffic (私域), field marketing (地推). Audience tiers: founders/principals (operations- and cash-flow-oriented, conclusions first); teaching & academic-affairs line (attendance, completion, and score detail); marketing & enrollment line (channel, conversion, and CAC detail). Phrasing discipline: "students in the course improved by X points on average", not "the course raised scores by X points" (no control group → no attribution; selection bias); "high-attendance students renew at a higher rate", not "attendance drives renewal" (learning motivation is a confounder); enrollment drops coinciding with policy events are temporal overlap, not validated causation; **never quote from memory any industry benchmark such as average renewal rates, CAC levels, or conversion-rate benchmarks** — enforce benchmark discipline strictly (user-provided, or authorized search with cited sources).
+正价课/引流课、转介绍、续费/扩科、退费、课消、满班率、到课、完课、提分、寒暑假班/春秋季班、双师、OMO、私域、地推。受众分层：创始人/校长（关注经营与现金流，结论先行）；教学教务条线（出勤、完课与成绩细节）；市场招生条线（渠道、转化与 CAC 细节）。措辞纪律：说「上课学员平均提分 X 分」，不说「课程提分 X 分」（没有对照组就不能归因；存在选择性偏差）；说「高出勤学员的续费率更高」，不说「出勤带动续费」（学习动机是混淆因素）；报名下滑与政策事件重合只是时间上的重叠，不是已验证的因果；**绝不凭记忆引用平均续费率、CAC 水平、转化率基准等行业基准**——基准纪律严格执行（用户提供，或授权搜索并标注来源）。
 
-## Report Section Emphasis
+## 报告分节侧重
 
-Deep-dive priority: enrollment panorama (always) → student retention & renewal (always) → course/campus structure & capacity (always) → conversion funnel & channel acquisition (requires data) → learning behavior & teaching outcomes (requires data) → class-hour consumption & operating health (requires data). Go-to charts: enrollment bars + renewal-rate line on dual axes, conversion funnel (funnel series), course enrollment/revenue Pareto, score-distribution histogram / box plot (five-number summary precomputed in Python per visualization.md), prepayment vs consumption double-line, channel grouped bars. All within ECharts 5.4.3 pure-JSON capability.
+深入分析优先级：招生全景（必做）→ 学员留存与续费（必做）→ 课程/校区结构与产能（必做）→ 转化漏斗与渠道获客（需要数据）→ 学习行为与教学成果（需要数据）→ 课消与经营健康（需要数据）。常用图表：报名柱 + 续费率折线双轴、转化漏斗（funnel series）、课程报名/收入帕累托、成绩分布直方图 / 箱线图（五数概括按 visualization.md 要求在 Python 侧预先算好）、预收与课消双折线、渠道分组柱。全部控制在 ECharts 5.4.3 的纯 JSON 能力范围内。

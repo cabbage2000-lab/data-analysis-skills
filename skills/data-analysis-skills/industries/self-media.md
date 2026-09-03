@@ -1,34 +1,34 @@
-# Self-Media / Content Creator Analysis Template
+# 自媒体 / 内容创作者分析模版
 
-Scope: individual creators, bloggers, MCN multi-account operations, brand-owned social accounts. Identification signals: followers (粉丝/关注), likes/saves/comments/shares (点赞/收藏/评论/转发), notes/videos/image-text posts (笔记/视频/图文), views/impressions/reads (播放/曝光/阅读), completion (完播), follower growth (涨粉), or mention of platforms such as Xiaohongshu/RED (小红书), Douyin (抖音), Bilibili (B站), WeChat Official Accounts (公众号), WeChat Channels (视频号), Kuaishou (快手).
+适用范围：个人创作者、博主、MCN 多账号运营、品牌自营社交账号。识别信号：粉丝/关注、点赞/收藏/评论/转发、笔记/视频/图文、播放/曝光/阅读、完播、涨粉等字段，或提到小红书、抖音、B站、公众号、视频号、快手等平台。
 
-## KPI System (KPI Dictionary & Definitions)
+## KPI 体系（KPI 词典与定义）
 
-| KPI | Definition | Points to confirm |
+| KPI | 定义 | 需确认的点 |
 |------|------|------|
-| Engagement rate | (likes + saves + comments + shares) / reads or views | Whether the denominator is impressions or reads/views differs by platform; if impression data is missing, use reads/views and say so |
-| Completion rate (完播率) | Complete plays / plays | Video only; **requires watch-duration data**; platform definitions vary (3s/5s/full video) — confirm |
-| Net follower growth | New follows − unfollows | Unfollow data is often missing; if so, report new follows only and say so |
-| Follower conversion efficiency (涨粉效率) | Net follower growth / reads (views) | Measures how well content converts reach into followers; per-content granularity requires per-post follower data |
-| Save-to-like ratio (赞藏比) | Saves / likes | Signal on image-text platforms (Xiaohongshu): high saves = practical how-to content, high likes = emotional resonance |
-| Viral-hit rate (爆款率) | Posts above the threshold / posts published | Default threshold uses **the account's own percentiles** (e.g. P90 of engagement) as an internal definition; if the user has their own threshold (e.g. 1,000+ likes & saves), use theirs |
-| Publishing frequency | Posts / week | Confirm the window and what counts as a "post" (do reposts/compilations count?) |
-| Brand-deal monetization (商单) | Brand-deal revenue, revenue per follower | **Requires monetization data**; skip if missing |
+| 互动率 | （点赞 + 收藏 + 评论 + 转发）/ 阅读或播放 | 分母用曝光还是阅读/播放，各平台口径不同；没有曝光数据就用阅读/播放并说明 |
+| 完播率 | 完整播放 / 播放 | 仅视频适用；**需要观看时长数据**；平台定义不一（3 秒/5 秒/完整视频）——需确认 |
+| 净涨粉 | 新增关注 − 取关 | 取关数据常缺失；缺失时只报新增关注并说明 |
+| 涨粉效率 | 净涨粉 / 阅读（播放） | 衡量内容把触达转化为粉丝的能力；要做到单篇粒度需要分篇的涨粉数据 |
+| 赞藏比 | 收藏 / 点赞 | 图文平台（小红书）的信号：收藏高 = 实用干货型，点赞高 = 情绪共鸣型 |
+| 爆款率 | 超过阈值的内容 / 已发布内容 | 默认阈值用**账号自身的分位数**（如互动量 P90）做内部定义；用户有自己的阈值（如点赞收藏过千）就用用户的 |
+| 发布频次 | 内容数 / 周 | 确认统计窗口，以及什么算「一篇」（转发/合集算不算） |
+| 商单变现 | 商单收入、单粉价值 | **需要变现数据**；缺失则跳过 |
 
-Metrics with missing fields: skip them and state in the report "the data does not include X, so Y was not computed" — never fabricate. Never cite unsourced external standards like "100k+ views counts as viral platform-wide" — judge viral hits only by the account's internal percentiles or the user's stated threshold.
+字段缺失的指标：跳过，并在报告里写明「数据不含 X，因此未计算 Y」——绝不编造。绝不引用「全平台 10 万播放算爆款」这类无来源的外部标准——爆款只按账号内部分位数或用户给定的阈值判定。
 
-## Typical Analysis Themes
+## 典型分析主题
 
-1. **Content performance distribution & viral-hit analysis**: Pareto (how concentrated traffic/engagement is in top content); common traits of viral hits (topic, format, title features, publish time); temporal association between viral-hit publication and follower growth (phrase cautiously)
-2. **Topic & format comparison**: engagement differences across topics/niches and image-text vs video; when a topic has few samples, flag the statistical-power limitation and withhold a verdict
-3. **Publishing strategy**: publish time-of-day/weekday × performance; publishing frequency vs performance. Mind correlation ≠ causation — strong performance may simply mean important content gets scheduled into prime slots
-4. **Follower growth**: growth curve and inflection points; how inflections line up in time with content events (viral hits, campaigns, collaborations)
-5. **Engagement structure & follower quality**: composition of likes/saves/comments/shares — comment-heavy = discussion-driven, save-heavy = practical reference; add brand-deal / e-commerce selling (带货) analysis when monetization data exists
+1. **内容表现分布与爆款分析**：帕累托（流量/互动向头部内容集中的程度）；爆款的共性（选题、形式、标题特征、发布时间）；爆款发布与涨粉在时间上的关联（措辞要审慎）
+2. **选题与形式对比**：不同选题/赛道、图文 vs 视频的互动差异；某选题样本太少时标注统计功效局限，不下结论
+3. **发布策略**：发布时段/星期 × 表现；发布频次与表现的关系。注意相关 ≠ 因果——表现好也可能只是因为重要内容本来就被排进了黄金时段
+4. **粉丝增长**：增长曲线与拐点；拐点与内容事件（爆款、活动、合作）在时间上的对应关系
+5. **互动结构与粉丝质量**：点赞/收藏/评论/转发的构成——评论多 = 讨论驱动，收藏多 = 实用参考；有变现数据时补充商单/带货分析
 
-## Narrative Language
+## 叙事语言
 
-Viral hit (爆款), follower growth (涨粉), completion (完播), engagement (互动), seeding (种草), note (笔记, Xiaohongshu), traffic (流量), organic traffic (自然流量), brand deal (商单), KOL/KOC, niche (赛道), persona (人设), data retrospective (数据复盘). The default audience is the creator themselves — usually not a data professional: speak plainly, lead with conclusions, make recommendations actionable ("review-style notes have the highest save rate — worth posting more"); for MCN/agency operators, keep the definition details. Attribute cautiously: "the viral hit's launch week accounts for 40% of the month's follower growth", not "the viral hit drove 40% of follower growth".
+爆款、涨粉、完播、互动、种草、笔记（小红书）、流量、自然流量、商单、KOL/KOC、赛道、人设、数据复盘。默认受众就是创作者本人——通常不是数据专业人士：说人话、结论先行、建议可执行（「测评类笔记收藏率最高，值得多发」）；面向 MCN/机构运营则保留定义细节。归因要审慎：说「爆款发布当周贡献了当月 40% 的涨粉」，不说「爆款带来了 40% 的涨粉」。
 
-## Report Section Emphasis
+## 报告分节侧重
 
-Deep-dive priority: content performance distribution (always) → topic/format comparison (always) → publishing strategy → follower growth (requires follower data) → engagement structure/monetization (requires data). Go-to charts: Pareto chart (content contribution), scatter (publish time × engagement), line + event annotations (follower-growth inflections), grouped bars (topic comparison), stacked bars (engagement structure).
+深入分析优先级：内容表现分布（必做）→ 选题/形式对比（必做）→ 发布策略 → 粉丝增长（需要粉丝数据）→ 互动结构/变现（需要数据）。常用图表：帕累托图（内容贡献）、散点图（发布时间 × 互动）、折线 + 事件标注（涨粉拐点）、分组柱状图（选题对比）、堆叠柱（互动结构）。

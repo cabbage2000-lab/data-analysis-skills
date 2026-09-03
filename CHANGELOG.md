@@ -13,6 +13,35 @@ Entries below v0.18 keep the names in use at the time (`data-analysis-skill`, an
 - **Government / public sector template** — pending user demand confirmation
 - **Method modules** (`references/`) enhancement — anomaly detection, NLP sentiment (§2.4 roadmap)
 
+
+---
+
+## v0.18.3 — 2026-09-03
+
+The skill body goes Chinese-first. PATCH under the requirements-doc semantics (instruction rewording; no new capability, no contract change): the five-phase workflow, the gates, the statistical discipline, the template data contract and every cross-reference path are untouched — only the language changes. Version bumped 0.18.2 → 0.18.3 across all four places.
+
+### fix
+- **All 16 skill files rewritten in Chinese** (2026-09-03, user-reported): `SKILL.md` (169 lines), the 9 `industries/` templates (307 lines) and the 6 `references/` modules (360 lines) — 836 lines total. The trigger was the SkillHub detail page: its **概述 (Overview) tab renders the SKILL.md body verbatim**, so an all-English body was being shown to an audience that is entirely Chinese-speaking. Since these files are the instructions the model reads, this is a change to skill behavior, not to display copy
+- Preserved verbatim throughout: every `references/` `industries/` `assets/` path (checked programmatically — all resolve), ECharts option snippets and JSON field names (`stats`, `tables`, `insight`, `narrative`, `sections[]`, `processing_notes`, `__REPORT_DATA_JSON__`), colour hexes, Python code blocks, and domain abbreviations Chinese speakers use as-is (GMV, MRR, NDR, CAC, LTV, AOV, ASP, EBITDA, DSO/DPO, OMO, EDA, IQR, Pareto, cohort, DID, PSM, SRM)
+- Fixed an inconsistency surfaced by the rewrite: SKILL.md named the report's six sections in English (Key Findings / Background & Objectives / …) while `report_template.html` and `check_report_html.py` have always used the Chinese names (核心发现 / 分析背景与目标 / 数据概况 / 深入分析 / 结论与建议 / 附录：数据处理说明). SKILL.md now matches the template
+- `## Red Flags` became `## 危险信号（Red Flags）` — the English term is kept in parentheses so the section still maps onto the requirements doc and CLAUDE.md, which both refer to it by that name
+- **Verification run**: `validate_template.py` 37/37 PASS; all `references/` / `industries/` / `assets/` references resolve; `skillhub publish --dry-run` passed; published and synced to all three hosts. **Not run**: the T1–T14 evals. The iteration-1 baseline (with skill 100% vs without 68%) was measured on the English body and no longer describes the shipped skill — per requirements §13 this needs a re-run, deferred to a separate round by the user's decision
+
+---
+
+## v0.18.2 — 2026-09-02
+
+SkillHub listed as a fourth distribution channel, plus a Chinese-first rewrite of `description` once measurement showed end users read it. PATCH: no change to the five-phase workflow, the gates, the statistical discipline or the template data contract. Version bumped 0.18.1 → 0.18.2 across all **four** places (three manifests + SKILL.md frontmatter).
+
+### chore
+- **SkillHub listed as a fourth distribution channel** (2026-09-02). Published as `@user_6733bad6/data-analysis-skills` (`skillId=181310`) — first pushed as v0.18.1, superseded the same day by v0.18.2 (see **fix** below). SkillHub reads its metadata only from SKILL.md frontmatter — `slug` / `displayName` / `version` are mandatory (publish is rejected if any is missing) — so `skills/data-analysis-skills/SKILL.md` gains those three plus `summary`. No behavior change: the other three hosts silently ignore all four fields, and the published payload is byte-identical to the repo (the platform only adds a `_meta.json` recording slug/version/ownerId — verified by `diff -r` against a re-installed copy). `slug` must stay equal to the directory name, and **is never changed once published** — it is the install directory name on every user's machine. **Version now lives in four places**, not three: the three manifests plus SKILL.md frontmatter (SkillHub reads the version from there); no script guards this yet.
+- **Two install traps documented in both READMEs** (Route D / Route D), both found by end-to-end testing rather than docs: (a) SkillHub slugs are unique only *within* a namespace, and `data-analysis-skills` is **also taken in another namespace** — omitting `--namespace user_6733bad6` makes the CLI fall back to "remote exact match" and silently install that unrelated skill (verified: lands `name: data-relation`, `ownerId: kn763n71…`, v1.0.7) under an identical directory name with no error; (b) installing *with* `--namespace` nests output one level deeper under `@user_6733bad6/`, and hosts only scan `skills/*/SKILL.md` at that one level, so the skill is never discovered — also with no error. The documented command therefore passes `--namespace` and then moves the inner directory up one level. Platform indexing lags publish by a few minutes (search and download both 404 immediately after `publish` returns)
+- **Platform search mechanics measured** (informs any future rename): only `slug` and `displayName` take part in recall — `summary` / `description` / `tags` do not; Chinese is not tokenized (the query is matched as one contiguous substring); prefix matches score far above mid-string ones; ranking is dominated by download count, and the platform pads short result lists with unrelated popular skills. Since `slug` is frozen, `displayName` is the only retrieval lever — hence `数据分析报告·行业化叙事`. Measured rankings on listing day (downloads=0): `data-analysis-skills` #2, `数据分析报告` #37, `数据分析` not in the top 100, the full display name #1. The CLI defaults to `limit=20`, so a user searching `数据分析报告` does not see it on the first page — a prefix match does not outrank download count, and no amount of copywriting changes that
+
+### fix
+- **`description` rewritten Chinese-first** (2026-09-02, user-reported: the platform detail page was showing a mixed English/Chinese string to an audience that is entirely Chinese-speaking). The platform's field mapping is **crossed, and both descriptions are user-facing** — measured against the `api.skillhub.cn/api/v1/search` response body: our `summary` lands in the platform's `description` (shown in listings), and our `description` lands in the platform's **`description_zh`** (shown on the detail page — the `_zh` suffix is the platform's own misnaming and holds whatever we wrote, English included). So `description` is not merely a trigger string for the model; it is read by Chinese end users. Rewritten in Chinese while keeping the English terms Chinese speakers use verbatim (CSV/Excel/JSON/TSV, EDA, A/B, dashboard) and keeping the CSO discipline intact — trigger conditions only, no summary of the five-phase workflow, negative boundary retained. **This changes trigger behavior across all three hosts, not just the platform display**; per requirements §13 a skill-creator description eval should be run to confirm trigger accuracy — not yet done
+- The two descriptions now have distinct jobs: `summary` says what you get (the pitch), `description` says when to use it (trigger conditions); both stay under the CSO discipline
+
 ---
 
 ## v0.18.1 — 2026-08-06

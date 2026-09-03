@@ -1,49 +1,49 @@
-# Multi-Source Data Intake
+# 多源数据接入
 
-Load when the input contains more than one dataset — an Excel file with >1 sheet, two or more files handed over at once, or a JSON whose top level is a `dict` with multiple array keys (each key is equivalent to one sheet).
+当输入含多个数据集时加载——一个 Excel 有 >1 个 sheet、一次给过来两个及以上文件、或 JSON 顶层是含多个数组键的 `dict`（每个键等价于一个 sheet）。
 
-## Hard rule: no silent data loss
+## 硬性规则：不得静默丢数据
 
-Reading only the first sheet / only the file the user named / collapsing JSON keys silently is **the cardinal sin here** — it produces a report the user cannot tell is incomplete. Before any analysis:
+只读第一个 sheet、只读用户点名的那个文件、或静默压掉 JSON 的键，是**这里的头号错误**——它会产出一份用户根本看不出它不完整的报告。任何分析开始之前：
 
-1. **Enumerate every source** — every sheet name, every file, every top-level JSON key
-2. **Surface the full source list** to the user in the reply
-3. **Confirm the relation strategy** (matrix below) — bundle this into the Phase 1 first-round questions; it counts against the existing 3×3 budget, no new round
+1. **枚举出每一个数据源**——每个 sheet 名、每个文件、每个 JSON 顶层键
+2. **在回复里把完整的数据源清单摆给用户**
+3. **确认关系策略**（下方矩阵）——把它并进阶段 1 的第一轮提问；它算在原有的 3×3 预算内，不另开一轮
 
-This extends the skill's existing "no silent truncation" discipline (the template never silently truncates a table; you never silently take the first sheet).
+这是把本 skill 已有的「不得静默截断」纪律延伸了一层（模板从不静默截断表格；你也不得静默地只取第一个 sheet）。
 
-## Identifying & reading each form
+## 各种形态的识别与读取
 
-| Form | Detection | Read pattern |
+| 形态 | 检测方式 | 读取模式 |
 |------|-----------|--------------|
-| Excel multi-sheet | `xl = pd.read_excel(path, sheet_name=None)` → `dict[str, DataFrame]`; `len(xl) > 1` = multi-sheet | iterate `xl.items()`; **never** `read_excel(path)` alone (defaults to `sheet_name=0`, silent loss) |
-| Multiple files | user gives ≥2 paths in one turn | list every path, read each with the matching `read_csv/read_excel/read_json`; the file named in the prompt is **not** necessarily the only target |
-| JSON multi-key | `json.load` → top-level `dict` with ≥2 array values | each key ≈ one sheet; do **not** `pd.read_json` on a dict-of-arrays (pandas may merge equal-length arrays into one wide table, or error — unpredictable) |
-| JSON nested | top-level dict with nested objects | `pd.json_normalize` to flatten into one table |
-| JSON record array | top-level `list` of objects | single table, the normal path |
+| Excel 多 sheet | `xl = pd.read_excel(path, sheet_name=None)` → `dict[str, DataFrame]`；`len(xl) > 1` 即多 sheet | 遍历 `xl.items()`；**绝不**单用 `read_excel(path)`（它默认 `sheet_name=0`，会静默丢失） |
+| 多文件 | 用户在一轮里给了 ≥2 个路径 | 列出每一个路径，各自用对应的 `read_csv/read_excel/read_json` 读取；提示里点名的那个文件**未必**是唯一目标 |
+| JSON 多键 | `json.load` → 顶层 `dict` 且有 ≥2 个数组值 | 每个键 ≈ 一个 sheet；**不要**对 dict-of-arrays 直接用 `pd.read_json`（pandas 可能把等长数组合并成一张宽表，也可能报错——行为不可预期） |
+| JSON 嵌套 | 顶层 dict 里嵌套对象 | 用 `pd.json_normalize` 展平成一张表 |
+| JSON 记录数组 | 顶层是对象组成的 `list` | 单表，走常规路径 |
 
-## Relation strategy matrix
+## 关系策略矩阵
 
-| Situation | Strategy | How |
+| 情况 | 策略 | 怎么做 |
 |-----------|----------|-----|
-| Same schema, different periods/segments (stack rows) | `concat` | `pd.concat([df1, df2], ignore_index=True)` |
-| Different entities sharing a key (join columns) | `merge` | `orders.merge(customers, on="customer_id", how="left")` |
-| No shared key / unrelated entities | independent per-source | analyze each source as its own `sections[]` entry |
-| Shared key but low match rate | flag before dropping | report orphan count; let the user decide left/inner join |
+| 同 schema、不同期间/分片（行拼接） | `concat` | `pd.concat([df1, df2], ignore_index=True)` |
+| 不同实体但共享键（列关联） | `merge` | `orders.merge(customers, on="customer_id", how="left")` |
+| 无共享键 / 实体不相关 | 各源独立 | 每个源作为独立的 `sections[]` 条目分析 |
+| 有共享键但匹配率低 | 丢弃前先预警 | 报告孤儿记录数；由用户决定 left 还是 inner join |
 
-Decision order: *same rows?* → concat. *shared entity key?* → merge. *neither?* → independent.
+判定顺序：*是同一批行吗？* → concat。*有共享的实体键吗？* → merge。*两者都不是？* → 独立分析。
 
-## Report organization (contract unchanged)
+## 报告的组织方式（契约不变）
 
-`report_data` is flat by design — multi-source is carried by **content**, not new fields:
+`report_data` 是刻意扁平的——多源靠**内容**承载，不新增字段：
 
-- **Fusion mode** (most common — sources joined into one table): write provenance into `data_overview.narrative` ("本报告基于 N 个数据源：订单(800 行) + 客户(120 行) + 商品(40 行)，按 customer_id / product_id 关联融合"), and record join keys + any dropped orphans in `appendix.processing_notes`. The rest flows as a normal single-dataset report.
-- **Per-source mode** (sources analyzed independently): one `sections[]` entry per source, the section `title` tagged with the source name; each section carries its own charts/tables/insight.
+- **融合模式**（最常见——多个源关联成一张表）：把来源信息写进 `data_overview.narrative`（「本报告基于 N 个数据源：订单(800 行) + 客户(120 行) + 商品(40 行)，按 customer_id / product_id 关联融合」），并把关联键与被丢弃的孤儿记录记入 `appendix.processing_notes`。其余按普通单数据集报告走。
+- **分源模式**（各源独立分析）：每个源一个 `sections[]` 条目，section 的 `title` 标上源名；每节自带自己的图表/表格/洞察。
 
-## Anti-patterns (the silent-loss traps)
+## 反模式（静默丢失的几个陷阱）
 
-- `pd.read_excel(path)` — reads only sheet 0. Always pass `sheet_name=None` first to see what is there.
-- Processing only the file the user named when three were attached.
-- `pd.read_json` on `{"orders":[...], "customers":[...]}` — inspect the top level first, never feed a dict-of-arrays straight to `read_json`.
-- Joining without checking key match rate — a low match rate silently shrinks the dataset.
-- Reading the first source, producing a full report, and only *then* noticing the others — by then the silent loss has already happened.
+- `pd.read_excel(path)`——只读了第 0 个 sheet。永远先传 `sheet_name=None` 看看里面有什么。
+- 附了三个文件，却只处理用户点名的那一个。
+- 对 `{"orders":[...], "customers":[...]}` 直接 `pd.read_json`——先检查顶层结构，绝不把 dict-of-arrays 直接喂给 `read_json`。
+- 关联时不检查键的匹配率——匹配率低会静默地把数据集缩小。
+- 先读了第一个源、做完整份报告，*然后*才发现还有别的源——到那时静默丢失已经发生了。

@@ -1,36 +1,36 @@
-# Construction Industry Analysis Template
+# 建筑施工行业分析模版
 
-Scope: construction/contracting companies (general contractors, specialty subcontractors, decoration/municipal/infrastructure contractors) analyzing construction production and operations data — project output & progress, labor/material/machinery costs, contract intake, cash collection. Identification signals: fields such as output value (产值), physical progress (形象进度), work quantities (工程量), labor/materials/machinery (人材机), contract value / new signings / winning bids (合同额/新签/中标), project/section/site (项目/标段/工地), interim measurement (计量), variation orders (签证), settlement (结算), cash collection (回款), receivables, hazards/incidents (隐患/事故), acceptance (验收), or descriptions from contractors / engineering bureaus / project departments. Routing: the company's own P&L/expense/budget analysis (account dimension) → corporate-finance.md, while project-dimension labor/material/machinery costs belong here; developer sales data (commitment/signing/absorption) → real-estate.md; survey & design / cost consulting → general.md for now; when hard to tell, confirm with the user.
+适用范围：建筑施工/承包企业（总承包、专业分包、装饰/市政/基建承包商）分析施工生产与经营数据——项目产值与进度、人材机成本、合同承接、回款。识别信号：产值、形象进度、工程量、人材机、合同额/新签/中标、项目/标段/工地、计量、签证、结算、回款、应收、隐患/事故、验收等字段，或来自施工企业/工程局/项目部的描述。分流：企业自身的损益/费用/预算分析（科目维度）→ corporate-finance.md，而项目维度的人材机成本属于本模版；开发商销售数据（认购/签约/去化）→ real-estate.md；勘察设计/造价咨询 → 暂走 general.md；不好判断时向用户确认。
 
-## KPI System (KPI Dictionary & Definitions)
+## KPI 体系（KPI 词典与定义）
 
-| KPI | Definition | Points to confirm |
+| KPI | 定义 | 需确认的点 |
 |------|------|------|
-| Completed output value | Aggregate by period | **Output value (产值) ≠ revenue ≠ cash collection** — the three definitions differ widely; confirm which one the data uses first. Self-performed output vs total output including subcontractors must be distinguished and declared |
-| Output plan completion rate | Cumulative completed output / planned output | Whether the denominator is **the annual target, total contract value, or milestone plan** changes results a lot — declare it |
-| Physical progress variance | Actual progress − planned progress | Different progress-measurement methods (output share / physical quantities / schedule share) can flip the conclusion — declare which is used |
-| New contract value | Aggregate by signing date | **Winning a bid (中标) ≠ signing (签约) ≠ taking effect (生效)**; distinguish framework agreements from formal contracts |
-| Backlog coverage ratio | Outstanding contract backlog / annualized output | **Requires backlog data**; declare the annualization window |
-| Cost structure | Shares of the four cost classes: labor / materials / machinery / subcontracting | **Requires cost data**; budget-vs-actual must be on the same work-quantity basis |
-| Cost variance rate | (Actual cost − budgeted cost) / budgeted cost | **Requires budget data**; unbooked quantity changes / variation orders distort the variance — conclusions must note it |
-| Collection rate / settlement rate | Cumulative collections / cumulative output (or settled or invoiced amount); cumulative settlements / cumulative output | Denominator definitions differ widely — declare them; retention money lags by nature |
-| Safety & quality | Hazard rectification rate, first-pass acceptance rate | **Requires safety/quality data**; skip if missing |
+| 完成产值 | 按期间汇总 | **产值 ≠ 收入 ≠ 回款**——三个口径差异极大，先确认数据用的是哪一个。自行完成产值与含分包的总产值必须区分并声明 |
+| 产值计划完成率 | 累计完成产值 / 计划产值 | 分母是**年度目标、合同总额还是节点计划**，结果差很多——必须声明 |
+| 形象进度偏差 | 实际进度 − 计划进度 | 进度计量方式不同（产值占比 / 实物工程量 / 工期占比）可能让结论反转——必须声明采用哪一种 |
+| 新签合同额 | 按签约日期汇总 | **中标 ≠ 签约 ≠ 生效**；框架协议与正式合同要区分 |
+| 合同储备倍数 | 未完合同储备 / 年化产值 | **需要合同储备数据**；需声明年化窗口 |
+| 成本结构 | 人工 / 材料 / 机械 / 分包四类成本占比 | **需要成本数据**；预算与实际对比必须建立在同一工程量基础上 |
+| 成本偏差率 | （实际成本 − 预算成本）/ 预算成本 | **需要预算数据**；未入账的工程量变更/签证会扭曲偏差——结论必须注明 |
+| 回款率 / 结算率 | 累计回款 / 累计产值（或已结算、已开票金额）；累计结算 / 累计产值 | 分母口径差异极大——必须声明；质保金天然滞后 |
+| 安全与质量 | 隐患整改率、一次验收合格率 | **需要安全/质量数据**；缺失则跳过 |
 
-Metrics with missing fields: skip them and state in the report "the data does not include X, so Y was not computed" — never fabricate. Cross-project comparisons must align business types and pricing bases first.
+字段缺失的指标：跳过，并在报告里写明「数据不含 X，因此未计算 Y」——绝不编造。跨项目对比前必须先对齐业务类型与计价基础。
 
-## Typical Analysis Themes
+## 典型分析主题
 
-1. **Output & progress panorama**: output trajectory + plan completion rate + physical progress variance; **an output surge must be split into batched recognition vs real construction pace** — peaks from year-end pushes or lagged measurement do not signal higher capacity
-2. **Project structure & contribution decomposition**: output and gross-profit contribution by project / business type (building, municipal, infrastructure, decoration) / region (Pareto: which projects carry output and profit); identify schedule-lagging and loss-making projects
-3. **Cost structure & variance** (requires cost data): labor/materials/machinery/subcontracting mix and trends; budget-vs-actual variance localization (quantity-variance vs price-variance decomposition)
-4. **Contract intake & backlog** (requires business-development data): new-contract trend and mix, bid win rate, backlog coverage ratio
-5. **Output-settlement-collection chain** (requires settlement/collection data): the three trajectories and their gaps, receivables aging; when gaps widen, flag contractor-financing pressure (垫资) and cash-collection pacing — phrase cautiously
-6. **Safety & quality** (requires safety/quality data): hazard/incident trends, rectification closure rate, first-pass acceptance rate; when safety events overlap with schedule-rush periods, phrase cautiously (correlation, not causation)
+1. **产值与进度全景**：产值轨迹 + 计划完成率 + 形象进度偏差；**产值放量必须拆成集中确认 vs 真实施工节奏**——年底冲量或滞后计量造出来的峰值不代表产能提升
+2. **项目结构与贡献拆解**：按项目 / 业务类型（房建、市政、基建、装饰）/ 区域的产值与毛利贡献（帕累托：哪些项目扛起了产值和利润）；识别进度滞后项目与亏损项目
+3. **成本结构与偏差**（需要成本数据）：人材机分包的构成与趋势；预算与实际的偏差定位（量差与价差拆解）
+4. **合同承接与储备**（需要经营数据）：新签合同趋势与结构、投标中标率、合同储备倍数
+5. **产值—结算—回款链条**（需要结算/回款数据）：三条轨迹及其缺口、应收账龄；缺口扩大时提示关注垫资压力与回款节奏——措辞要审慎
+6. **安全与质量**（需要安全/质量数据）：隐患/事故趋势、整改闭环率、一次验收合格率；安全事件与赶工期重叠时措辞要审慎（相关，不是因果）
 
-## Narrative Language
+## 叙事语言
 
-Output value (产值), cumulative-to-date (开累), physical progress (形象进度), labor/materials/machinery (人材机), general contracting / subcontracting (总包/分包), interim measurement (计量), variation orders (签证), settlement (结算), cash collection (回款), contractor financing (垫资), contract backlog (合同储备), winning bids (中标). Audience tiers: company executives (operations- and cash-flow-oriented, conclusions first); project management line (progress and cost-variance detail); business development (contract intake and settlement/collection detail). Phrasing discipline: "cost variance widened during the period of rising material prices", not "material price increases caused the overrun" (the variance also contains quantity changes and late-booked variation orders); "hazard counts rose during schedule-rush phases", not "schedule rushing caused safety risk" (correlation, not causation); **never quote from memory any industry benchmark such as construction-sector average margins, labor-cost shares, or output-margin rankings** — enforce benchmark discipline strictly (user-provided, or authorized search with cited sources); output-value conclusions must state the definition used (output ≠ revenue ≠ collection).
+产值、开累、形象进度、人材机、总包/分包、计量、签证、结算、回款、垫资、合同储备、中标。受众分层：企业高管（关注经营与现金流，结论先行）；项目管理条线（进度与成本偏差细节）；经营开发条线（合同承接与结算回款细节）。措辞纪律：说「材料涨价期间成本偏差扩大」，不说「材料涨价导致了超支」（偏差里还含工程量变更与滞后入账的签证）；说「赶工期阶段隐患数上升」，不说「赶工导致安全风险」（相关，不是因果）；**绝不凭记忆引用建筑业平均利润率、人工成本占比、产值利润率排名等行业基准**——基准纪律严格执行（用户提供，或授权搜索并标注来源）；产值类结论必须写明所采用的口径（产值 ≠ 收入 ≠ 回款）。
 
-## Report Section Emphasis
+## 报告分节侧重
 
-Deep-dive priority: output & progress panorama (always) → project structure & contribution (always) → cost structure variance (requires data) → output-settlement-collection (requires data) → contract intake (requires data) → safety & quality (requires data). Go-to charts: output bars + completion-rate line on dual axes, project-output Pareto, labor/materials/machinery cost stacked bars, output/settlement/collection triple-line chart, new-contract bars, planned-vs-actual progress grouped bars. All within ECharts 5.4.3 pure-JSON capability (no Gantt — the custom series requires functions, violating the pure-JSON constraint).
+深入分析优先级：产值与进度全景（必做）→ 项目结构与贡献（必做）→ 成本结构偏差（需要数据）→ 产值结算回款（需要数据）→ 合同承接（需要数据）→ 安全与质量（需要数据）。常用图表：产值柱 + 完成率折线双轴、项目产值帕累托、人材机成本堆叠柱、产值/结算/回款三折线、新签合同柱、计划与实际进度分组柱。全部控制在 ECharts 5.4.3 的纯 JSON 能力范围内（不做甘特图——custom series 需要函数，违反纯 JSON 约束）。

@@ -1,52 +1,52 @@
-# Time-Series Analysis & Forecasting
+# 时间序列分析与预测
 
-Load when the data has a time dimension and the user needs trend analysis or forecasting.
+当数据有时间维度、且用户需要趋势分析或预测时加载。
 
-## Method Tiers (choose in this order; do not bring in heavier methods)
+## 方法分级（按此顺序选，不要上更重的方法）
 
-| Tier | Method | When |
+| 级别 | 方法 | 何时用 |
 |------|------|------|
-| Default | Exponential smoothing (Holt-Winters), ARIMA / SARIMA (statsmodels) | The vast majority of business series; interpretable, stable on small data |
-| Optional | Prophet | Pronounced holiday/multi-seasonal effects and prophet is already installed |
-| Never | LSTM and other deep learning | Heavy dependencies; no better than classical methods on small data (explicitly excluded by requirements) |
+| 默认 | 指数平滑（Holt-Winters）、ARIMA / SARIMA（statsmodels） | 绝大多数业务序列；可解释，小数据上稳定 |
+| 可选 | Prophet | 节假日/多重季节效应明显，且已装好 prophet |
+| 禁用 | LSTM 等深度学习 | 依赖重；小数据上并不优于经典方法（需求文档明确排除） |
 
-## Pre-Forecast Checks (fail → degrade to trend description)
+## 预测前的检查（不通过 → 降级为趋势描述）
 
-1. **Number of points**: monthly series < 24 points, weekly < 52 → **no model forecasting**; describe trend and seasonality only, and say why (sample too small to estimate seasonal terms stably)
-2. **Gaps & frequency**: is the time index evenly spaced, any missing months? Fill gaps or resample first, and record it in the Data Processing Notes
-3. **Structural breaks**: level shifts visible to the eye (product revamp, pandemic) → annotate them in the report; consider modeling only the post-break data
-4. **Stationarity**: run an ADF test before ARIMA; difference as needed
+1. **点数**：月度序列 < 24 个点、周度 < 52 个点 → **不做模型预测**；只描述趋势与季节性，并说明原因（样本太小，季节项估不稳）
+2. **缺口与频率**：时间索引是否等距，有没有缺月？先补齐或重采样，并记入「数据处理说明」
+3. **结构性断点**：肉眼可见的水平跳变（产品改版、疫情）→ 在报告里标注出来；考虑只对断点之后的数据建模
+4. **平稳性**：做 ARIMA 前先跑 ADF 检验；按需差分
 
-## Standard Flow
+## 标准流程
 
-1. Resample to the analysis granularity (day/week/month) → 2. STL decomposition (trend/seasonal/residual; the decomposition plot goes into the report) → 3. Select the model order with a stated basis (see below) and fit → 4. Residual diagnostics (Ljung-Box) → 5. Out-of-sample backtest before trusting the forecast (see below) → 6. Forecast + **confidence intervals**
+1. 重采样到分析粒度（日/周/月）→ 2. STL 分解（趋势/季节/残差；分解图要进报告）→ 3. 有依据地选定阶数（见下文）并拟合 → 4. 残差诊断（Ljung-Box）→ 5. 在相信预测之前先做样本外回测（见下文）→ 6. 预测 + **置信区间**
 
-Forecasts must carry intervals: "next 3 months forecast X (95% interval [L, U])". A point forecast alone is not acceptable. Forecast horizon must not exceed 1/4 of the history length; beyond that, state the extrapolation risk.
+预测必须带区间：「未来 3 个月预测 X（95% 区间 [L, U]）」。只给点预测不合格。预测跨度不得超过历史长度的 1/4；超出就要说明外推风险。
 
-## Model Order Selection
+## 模型定阶依据
 
-Don't pick (p,d,q) or smoothing parameters by guesswork — an unjustified order is just a hidden assumption the reader can't check:
+不要靠猜来定 (p,d,q) 或平滑参数——没有依据的阶数只是一个读者无法检验的隐藏假设：
 
-- ARIMA/SARIMA: read ACF/PACF (cutoff vs tail-off) to seed orders, or grid-search by AIC/BIC; `pmdarima.auto_arima` is fine when installed (fall back to a manual AIC/BIC search if it is missing).
-- Record the chosen order and the basis for it in the report, so the choice is auditable rather than magic.
+- ARIMA/SARIMA：看 ACF/PACF（截尾 vs 拖尾）确定候选阶数，或按 AIC/BIC 做网格搜索；装了 `pmdarima.auto_arima` 就用它（没装则退回手工 AIC/BIC 搜索）。
+- 把选定的阶数及其依据记进报告，让这个选择可被审查，而不是一个魔法数字。
 
-## Out-of-Sample Validation (do this before the final forecast)
+## 样本外验证（在给出最终预测之前必须做）
 
-A forecast you never backtested can be confidently wrong, and a 95% interval only describes the model's own assumptions, not whether it actually tracks reality. So before producing the final forecast:
+没有回测过的预测可以「自信地错」，而 95% 区间只描述模型自身的假设，并不说明它是否真的跟得上现实。所以在产出最终预测前：
 
-- Hold out the last k periods (k ≈ the forecast horizon), or run walk-forward validation: refit on the training span only and report MAPE/MAE on the held-out tail.
-- A model that just fits the full sample and extrapolates, with no backtest, is not acceptable — you have no evidence it predicts rather than overfits.
-- Compare against a naive baseline (seasonal-naive / last-value). If the model can't beat that, prefer the simpler baseline and say so.
+- 留出最后 k 期（k ≈ 预测跨度），或做滚动前向验证：只用训练段拟合，在留出的尾部报告 MAPE/MAE。
+- 只在全样本上拟合然后外推、完全不做回测的模型不合格——你没有任何证据表明它是在预测而不是在过拟合。
+- 与朴素基线（季节朴素 / 上期值）对比。模型打不过基线，就选更简单的基线并说明这一点。
 
-## Exponential Smoothing Example (statsmodels)
+## 指数平滑示例（statsmodels）
 
 ```python
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
-# Monthly data, yearly seasonality; fall back to trend-only when the sample covers < 2 full seasonal cycles
+# 月度数据、年度季节性；样本不足 2 个完整季节周期时退回只做趋势项
 model = ExponentialSmoothing(series, trend="add", seasonal="add", seasonal_periods=12).fit()
 forecast = model.forecast(3)
 ```
 
-## Dependency Degradation
+## 依赖降级
 
-statsmodels missing and pip install fails: skip ARIMA/exponential smoothing; describe the trend with moving averages + YoY/MoM tables instead, and state in the report "why no model forecast was made".
+statsmodels 缺失且 pip 安装失败：跳过 ARIMA/指数平滑；改用移动平均 + 同比/环比表来描述趋势，并在报告里说明「为什么没有做模型预测」。

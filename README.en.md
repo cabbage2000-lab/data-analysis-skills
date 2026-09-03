@@ -138,6 +138,25 @@ To upgrade later, `git pull` and run the same command again.
 >
 > **Only want it in one project?** Replace the user-level path with the project-level directory in that project's root: `.claude/skills/` for Claude Code, `.codex/skills/` for Codex, and **`.codebuddy/skills/` for WorkBuddy** — note it is *not* `.workbuddy/`: the user-level directory is `~/.workbuddy/`, but the project-level one keeps the underlying CodeBuddy-kernel name `.codebuddy/`. Get that asymmetry wrong and the skill never shows up.
 
+### Route D: the SkillHub community registry (no clone, one command)
+
+[SkillHub](https://skillhub.cn) is a Chinese skill community; this skill is published there as `@user_6733bad6/data-analysis-skills`. Its CLI has two traps — **the command below already works around both, so copy it verbatim**:
+
+```bash
+# Installs into Claude Code; swap in ~/.codex/skills or ~/.workbuddy/skills for the other two hosts
+skillhub install data-analysis-skills --namespace user_6733bad6 --dir ~/.claude/skills \
+  && mv ~/.claude/skills/@user_6733bad6/data-analysis-skills ~/.claude/skills/ \
+  && rmdir ~/.claude/skills/@user_6733bad6
+```
+
+> **Do not drop `--namespace user_6733bad6`.** SkillHub slugs are unique only within a namespace, and `data-analysis-skills` is **also taken by a different skill in someone else's namespace**. Without `--namespace`, the CLI falls back to "remote exact match" and installs that one instead — same directory name, no error whatsoever; you have to open `SKILL.md` to notice you got the wrong package.
+>
+> **Do not drop the `mv` + `rmdir` either.** Installing with `--namespace` nests everything one level deeper under `@user_6733bad6/`, and hosts only scan `skills/*/SKILL.md` at that one level — one extra level and **nothing is discovered, again with no error**.
+
+To upgrade later, rerun the same command with `--force` on the `install` step (otherwise it reports `Target exists`).
+
+All four routes install the same skill — **pick exactly one**; several copies means duplicate triggering.
+
 ## How to use it
 
 1. **Provide data, state your need.** In your agent, point to your data file and say what you want:

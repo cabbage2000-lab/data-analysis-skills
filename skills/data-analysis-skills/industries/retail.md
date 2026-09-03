@@ -1,33 +1,33 @@
-# Retail / E-commerce Analysis Template
+# 零售 / 电商分析模版
 
-Scope: e-commerce platforms, online shops, offline retail, omnichannel retail. Identification signals: fields or descriptions such as orders, SKU, GMV, shopping cart, store, category.
+适用范围：电商平台、网店、线下零售、全渠道零售。识别信号：订单、SKU、GMV、购物车、门店、品类等字段或描述。
 
-## KPI System (KPI Dictionary & Definitions)
+## KPI 体系（KPI 词典与定义）
 
-| KPI | Definition | Points to confirm |
+| KPI | 定义 | 需确认的点 |
 |------|------|------|
-| GMV | Σ(quantity × unit price × (1 − discount)) | Whether returns/cancellations are excluded (default: include returns and disclose the return amount separately) |
-| AOV (客单价) | GMV / order count | Distinguish per-order vs per-customer definitions |
-| Repeat purchase rate | Customers with ≥2 purchases in the period / customers with any purchase | Confirm the measurement window (90 days / annual) |
-| Return rate | Returned orders / total orders | Report both by order count and by amount |
-| Conversion rate | Purchasing visitors / total visitors | **Requires traffic data**; cannot be derived from order data alone — skip and explain if missing |
-| Inventory turnover | COGS / average inventory | **Requires inventory and cost data**; skip if missing |
-| SKU sell-through (动销率) | SKUs with sales / SKUs listed | Requires the full set of listed SKUs |
+| GMV | Σ(数量 × 单价 × (1 − 折扣)) | 是否剔除退货/取消（默认含退货，退货金额单独披露） |
+| 客单价（AOV） | GMV / 订单数 | 区分「每单」还是「每客」口径 |
+| 复购率 | 期内购买 ≥2 次的客户 / 期内有购买的客户 | 确认统计窗口（90 天 / 年度） |
+| 退货率 | 退货订单 / 总订单 | 按订单数和按金额两个口径都要报 |
+| 转化率 | 成交访客 / 总访客 | **需要流量数据**；仅凭订单数据推不出来——缺失就跳过并说明 |
+| 库存周转率 | 销货成本（COGS） / 平均库存 | **需要库存与成本数据**；缺失则跳过 |
+| 动销率 | 有销量的 SKU / 在架 SKU | 需要完整的在架 SKU 集合 |
 
-Metrics with missing fields: skip them and state in the report "the data does not include X, so Y was not computed" — never fabricate.
+字段缺失的指标：跳过，并在报告里写明「数据不含 X，因此未计算 Y」——绝不编造。
 
-## Typical Analysis Themes
+## 典型分析主题
 
-1. **Sales trend & seasonality**: monthly/weekly GMV trajectory; identify and annotate mega-promotion peaks (618 / Double 11 / Double 12); promotion dependence (share of GMV from promotion months)
-2. **Category/SKU structure**: Pareto analysis (concentration of category contribution); positioning differences between high-revenue-low-order and high-order-low-revenue categories
-3. **Customer value segmentation (RFM)**: three-way segmentation by recency/frequency/monetary; report each segment's headcount share and contribution, with per-segment operating recommendations
-4. **Promotion & discount effects**: discount depth × AOV/volume relationships (mind correlation ≠ causation — promotion months usually coincide with mega-promotion traffic)
-5. **Channel & regional comparison**: GMV/AOV/return-rate differences across channels; regional market performance
+1. **销售趋势与季节性**：月度/周度 GMV 走势；识别并标注大促峰值（618 / 双 11 / 双 12）；促销依赖度（大促月 GMV 占比）
+2. **品类/SKU 结构**：帕累托分析（品类贡献集中度）；「高金额低单量」与「高单量低金额」品类的定位差异
+3. **客户价值分层（RFM）**：按最近购买、购买频次、购买金额三维分层；报告各层人数占比与贡献占比，并给出分层运营建议
+4. **促销与折扣效果**：折扣力度 × 客单价/件数的关系（注意相关 ≠ 因果——大促月本身就叠加了大促流量）
+5. **渠道与地区对比**：各渠道 GMV/客单价/退货率差异；地区市场表现
 
-## Narrative Language
+## 叙事语言
 
-GMV, AOV (客单价), SKU, sell-through (动销), mega-promotions (大促), repeat purchase (复购), per-unit price (件单价), units per transaction (连带率), sales per square meter (坪效, offline). For executives, speak plainly ("the best-selling category"); for analysts, keep the definition details. Attribute growth cautiously: "promotion months account for 24% of GMV", not "promotions drove 24% of revenue".
+GMV、客单价、SKU、动销、大促、复购、件单价、连带率、坪效（线下）。面向高管说人话（「卖得最好的品类」）；面向分析师保留定义细节。归因要审慎：说「大促月贡献了 24% 的 GMV」，不说「促销带动了 24% 的收入」。
 
-## Report Section Emphasis
+## 报告分节侧重
 
-Deep-dive priority: sales trend (always) → category structure (always) → channel comparison → RFM/repeat purchase (requires customer IDs) → promotion effects. Go-to charts: Pareto chart (categories), calendar heatmap or annotated line (mega-promotions), RFM segment matrix table.
+深入分析优先级：销售趋势（必做）→ 品类结构（必做）→ 渠道对比 → RFM/复购（需要客户 ID）→ 促销效果。常用图表：帕累托图（品类）、日历热力图或带标注的折线（大促）、RFM 分层矩阵表。

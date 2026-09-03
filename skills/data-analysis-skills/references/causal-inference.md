@@ -1,42 +1,42 @@
-# Causal Inference Methods & Phrasing Discipline
+# 因果推断方法与措辞纪律
 
-Load when the user asks "did X cause/boost/affect Y" or explicitly wants causal conclusions.
+当用户问「X 是否导致/提升/影响了 Y」或明确想要因果结论时加载。
 
-## Step 1: What Level of Conclusion Does the Data Support?
+## 第一步：数据支撑得起什么层级的结论？
 
-| Data shape | Conclusion you may give |
+| 数据形态 | 你可以给出的结论 |
 |------|------|
-| Cross-sectional observational data | Correlation only + confounder warnings |
-| Panel data + intervention event + comparable control group | DID may be attempted |
-| Observational data with rich covariates | PSM may be attempted |
-| Randomized experiment data | Causal conclusions (hand off to ab-testing.md) |
+| 截面观察数据 | 只能给相关性 + 混淆因素提示 |
+| 面板数据 + 干预事件 + 可比对照组 | 可以尝试 DID |
+| 有丰富协变量的观察数据 | 可以尝试 PSM |
+| 随机实验数据 | 可以给因果结论（转交 ab-testing.md） |
 
-When method prerequisites are unmet, the fixed response is: **"the current data does not support a causal conclusion" + what data would be needed** (e.g. pre/post data with a control group, a randomized experiment). This is not boilerplate disclaimer — make it specific to the user's scenario.
+方法前提不满足时，固定回应：**「当前数据不支持因果结论」+ 需要什么样的数据**（例如带对照组的前后数据、随机实验）。这不是套话式免责声明——要结合用户的具体场景讲清楚。
 
-## Phrasing Table (enforced in reports and replies)
+## 措辞对照表（报告与回复中强制执行）
 
-| Forbidden (causal assertion) | Replacement (correlational phrasing) |
+| 禁用（因果断言） | 替换为（相关性措辞） |
 |------|------|
-| X boosted / caused / drove Y | X is strongly correlated with Y (r=…) |
-| Sales rose because we ran ads | Months with higher ad spend also show higher sales, but the same period also had… |
-| The effect of X is a z% lift in Y | A 1-unit change in X is associated with a z% change in Y (confounders uncontrolled) |
+| X 提升了 / 导致了 / 带动了 Y | X 与 Y 强相关（r=…） |
+| 因为投了广告所以销量涨了 | 广告投入较高的月份销量也较高，但同期还存在…… |
+| X 的效果是让 Y 提升 z% | X 每变动 1 个单位，Y 相应变动 z%（未控制混淆因素） |
 
-Correlational conclusions must do all three: (1) give the correlation coefficient and a strength judgment; (2) **proactively list the confounders visible in this data** (name the fields one by one, e.g. promotions, seasonality); (3) state the method or data that would be needed to establish causality.
+相关性结论必须同时做到三件事：（1）给出相关系数与强度判断；（2）**主动列出这份数据里可见的混淆因素**（逐个点出字段名，如促销、季节性）；（3）说明要确立因果需要什么方法或什么数据。
 
-## Method Quick Reference (use only when prerequisites hold; state assumptions in the report)
+## 方法速查（仅在前提满足时使用；假设要写进报告）
 
-### DID (Difference-in-Differences)
-- Prerequisites: treatment/control × pre/post panel data; **parallel-trends assumption** (pre-intervention trends of the two groups are parallel — must be verified with a plot that goes into the report)
-- Output: DID estimate + standard error; parallel-trends plot
+### DID（双重差分）
+- 前提：处理组/对照组 × 前后期的面板数据；**平行趋势假设**（两组在干预前的趋势平行——必须用图验证，且该图要进报告）
+- 输出：DID 估计值 + 标准误；平行趋势图
 
-### PSM (Propensity Score Matching)
-- Prerequisite: the key covariates driving "treated or not" are all present in the data (unverifiable — state this assumption honestly in the report)
-- Flow: logit propensity scores → nearest-neighbor matching → check post-match covariate balance (SMD < 0.1) → compare outcomes
-- Balance check fails: report the failure; do not force a conclusion
+### PSM（倾向得分匹配）
+- 前提：驱动「是否受处理」的关键协变量在数据里都有（这一点无法验证——要在报告里诚实声明该假设）
+- 流程：logit 算倾向得分 → 最近邻匹配 → 检查匹配后协变量平衡性（SMD < 0.1）→ 对比结果
+- 平衡性检验不通过：报告这一失败，不硬下结论
 
-### Randomized Experiments
-- Data comes from random assignment: follow the ab-testing.md test flow; causal phrasing is allowed (still report p-values and intervals)
+### 随机实验
+- 数据来自随机分配：按 ab-testing.md 的检验流程走；可以使用因果措辞（仍然要报告 p 值和区间）
 
-## Regression Coefficients ≠ Causal Effects
+## 回归系数 ≠ 因果效应
 
-"Controlling for other variables" in multiple regression is not causal identification: omitted variables, reverse causality, and collider bias may all be present. Use "association" phrasing for regression results unless the design satisfies one of the method prerequisites above.
+多元回归里的「控制了其它变量」不等于因果识别：遗漏变量、反向因果、对撞偏倚都可能存在。除非设计满足上面某个方法的前提，回归结果一律用「关联」措辞。

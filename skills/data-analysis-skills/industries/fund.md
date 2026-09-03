@@ -1,35 +1,35 @@
-# Fund Industry Analysis Template
+# 基金行业分析模版
 
-Scope: fund companies (product/research/marketing), distribution channels, and investors analyzing fund product data — NAV performance, AUM & subscription/redemption, holder structure. Identification signals: fields such as NAV / unit NAV / cumulative NAV (净值/单位净值/累计净值), returns, drawdown, units (份额), subscription/redemption (申购/赎回), AUM (管理规模), holders (持有人), fund code/fund name, Sharpe, or descriptions from fund companies / research teams / retail fund investors. Routing: the company's own P&L/budget analysis → corporate-finance.md; non-fund portfolio holdings / strategy backtests / credit data → general.md for now (a finance/quant finance.md is pending); when hard to tell, confirm with the user.
+适用范围：基金公司（产品/研究/市场）、销售渠道、以及投资者分析基金产品数据——净值表现、规模与申赎、持有人结构。识别信号：净值/单位净值/累计净值、收益率、回撤、份额、申购/赎回、管理规模、持有人、基金代码/基金名称、夏普等字段，或来自基金公司/研究团队/基民的描述。分流：公司自身的损益/预算分析 → corporate-finance.md；非基金的组合持仓/策略回测/信贷数据 → 暂走 general.md（金融/量化的 finance.md 尚未落地）；不好判断时向用户确认。
 
-## KPI System (KPI Dictionary & Definitions)
+## KPI 体系（KPI 词典与定义）
 
-| KPI | Definition | Points to confirm |
+| KPI | 定义 | 需确认的点 |
 |------|------|------|
-| Period return | (Ending NAV − beginning NAV) / beginning NAV | **Prefer cumulative/adjusted NAV** — unit NAV is marked down at dividend ex-dates and understates returns; confirm dividend treatment |
-| Annualized return | (1 + period return)^(365 / days in period) − 1 | Do not annualize periods under 6 months (short-period annualization amplifies volatility); annualized figures must state the underlying period |
-| Max drawdown | max(1 − NAV / running historical peak) | Annotate the drawdown's start/end dates and whether it has recovered |
-| Annualized volatility | Std dev of daily returns × √244 | Declare the convention: trading days √244 vs calendar days √365 |
-| Sharpe ratio | (Annualized return − risk-free rate) / annualized volatility | **The risk-free-rate assumption must be stated explicitly** (e.g. 2%), never left implicit |
-| Calmar ratio | Annualized return / max drawdown | Do not compute when drawdown is 0 or near 0 |
-| Net subscription | Subscribed units − redeemed units | **Requires subscription/redemption data**; skip if missing |
-| AUM change | Ending AUM − beginning AUM, split into NAV contribution vs flow contribution | **Requires AUM data**; AUM growth ≠ subscription inflow (it may just be NAV appreciation) |
-| Holder structure | Institutional/retail share, average units per holder | **Requires holder data**; skip if missing |
+| 区间收益率 | （期末净值 − 期初净值）/ 期初净值 | **优先用累计净值/复权净值**——单位净值在分红除权日会被调低，会低估收益；需确认分红处理方式 |
+| 年化收益率 | (1 + 区间收益率)^(365 / 区间天数) − 1 | 不足 6 个月的区间不做年化（短周期年化会放大波动）；给出年化数字必须同时说明底层区间 |
+| 最大回撤 | max(1 − 净值 / 历史滚动峰值) | 标注回撤的起止日期，以及是否已修复 |
+| 年化波动率 | 日收益率标准差 × √244 | 声明采用的惯例：交易日 √244 还是自然日 √365 |
+| 夏普比率 | （年化收益率 − 无风险利率）/ 年化波动率 | **无风险利率的假设必须明确写出**（如 2%），绝不隐含 |
+| 卡玛比率 | 年化收益率 / 最大回撤 | 回撤为 0 或接近 0 时不计算 |
+| 净申购 | 申购份额 − 赎回份额 | **需要申赎数据**；缺失则跳过 |
+| 规模变动 | 期末规模 − 期初规模，并拆分为净值贡献与申赎贡献 | **需要规模数据**；规模增长 ≠ 申购流入（也可能只是净值上涨） |
+| 持有人结构 | 机构/个人占比、户均份额 | **需要持有人数据**；缺失则跳过 |
 
-Metrics with missing fields: skip them and state in the report "the data does not include X, so Y was not computed" — never fabricate. Multi-fund comparisons must align periods first — funds with different inception dates cannot be compared on cumulative returns directly.
+字段缺失的指标：跳过，并在报告里写明「数据不含 X，因此未计算 Y」——绝不编造。多基金对比必须先对齐区间——成立日不同的基金不能直接比累计收益。
 
-## Typical Analysis Themes
+## 典型分析主题
 
-1. **Performance & risk panorama**: normalized return curve + drawdown curve + core metrics table (return/volatility/drawdown/Sharpe); examine performance separately in market up and down phases — never conclude from a single cumulative number
-2. **Multi-fund / peer comparison**: side-by-side under identical period definitions; risk-return scatter (x volatility, y annualized return) to locate "lower volatility at the same return, higher return at the same volatility"; highest return ≠ best risk-adjusted
-3. **AUM & flow behavior** (requires AUM/flow data): AUM trajectory and net subscriptions; the temporal relation between flows and performance — "subscriptions surge after NAV highs, redemptions surge after deep drawdowns" is the classic chase-and-flee pattern; phrase cautiously (correlation, not causation)
-4. **Rolling metrics & performance persistence**: rolling annualized return/volatility/Sharpe to test whether performance depends on a single phase
-5. **Holder structure** (requires holder data): shifts in the institutional/retail mix, concentration and redemption pressure
+1. **业绩与风险全景**：归一化收益曲线 + 回撤曲线 + 核心指标表（收益/波动/回撤/夏普）；市场上涨段与下跌段要分开看——绝不用一个累计数字下结论
+2. **多基金 / 同类对比**：在统一区间口径下并排比较；风险收益散点（x 波动率、y 年化收益）定位「同收益更低波动、同波动更高收益」；收益最高 ≠ 风险调整后最优
+3. **规模与资金行为**（需要规模/申赎数据）：规模轨迹与净申购；资金流与业绩的时间关系——「净值新高后申购放量、深度回撤后赎回放量」是典型的追涨杀跌形态；措辞要审慎（相关，不是因果）
+4. **滚动指标与业绩持续性**：滚动年化收益/波动/夏普，检验业绩是否只依赖某一个阶段
+5. **持有人结构**（需要持有人数据）：机构/个人占比的变化、集中度与赎回压力
 
-## Narrative Language
+## 叙事语言
 
-NAV (净值), drawdown (回撤), annualized (年化), Sharpe (夏普), volatility (波动), subscription/redemption (申赎), retained AUM (保有规模), risk-adjusted return (风险调整后收益). Audience tiers: fund-company executives (AUM- and ranking-oriented, conclusions first); research teams (keep risk-adjusted returns and definition details); retail investors (plain language, risk warnings up front). Phrasing discipline: attach "past performance does not predict future results" to any performance conclusion; "NAV gains were accompanied by larger net subscriptions", not "performance attracted inflows" (causal discipline); **never quote peer averages or benchmark-index values (e.g. CSI 300 / 沪深300) from memory** — funds are the highest-risk scenario for fabricated benchmarks; enforce benchmark discipline strictly (user-provided, or authorized search with cited sources).
+净值、回撤、年化、夏普、波动、申赎、保有规模、风险调整后收益。受众分层：基金公司高管（关注规模与排名，结论先行）；研究团队（保留风险调整后收益与定义细节）；基民（说人话，风险提示前置）。措辞纪律：任何业绩结论都要附上「过往业绩不预示未来表现」；说「净值上涨的同时伴随更大的净申购」，不说「业绩吸引了资金流入」（因果纪律）；**绝不凭记忆引用同类平均或基准指数点位（如沪深 300）**——基金是编造基准风险最高的场景，基准纪律要严格执行（用户提供，或授权搜索并标注来源）。
 
-## Report Section Emphasis
+## 报告分节侧重
 
-Deep-dive priority: performance & risk panorama (always) → multi-fund comparison (always when multiple funds) → AUM & flows (requires data) → rolling persistence → holder structure (requires data). Go-to charts: normalized NAV lines (multi-fund comparison, base = 1), drawdown area chart (filled downward from the 0 axis), risk-return scatter, AUM bars + signed net-subscription bars, rolling-metric lines. All within ECharts 5.4.3 pure-JSON capability.
+深入分析优先级：业绩与风险全景（必做）→ 多基金对比（有多只基金时必做）→ 规模与资金流（需要数据）→ 滚动持续性 → 持有人结构（需要数据）。常用图表：归一化净值折线（多基金对比，基准 = 1）、回撤面积图（从 0 轴向下填充）、风险收益散点、规模柱状图 + 带正负号的净申购柱、滚动指标折线。全部控制在 ECharts 5.4.3 的纯 JSON 能力范围内。

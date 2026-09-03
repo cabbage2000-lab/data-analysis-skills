@@ -1,31 +1,31 @@
-# General Analysis Template (Fallback Base)
+# 通用分析模版（兜底基座）
 
-Scope: industry unidentified; user rejected the identification without naming an industry; or industry identified but no matching template exists (in that case, inject industry terminology into the narrative on top of this framework).
+适用范围：行业识别不出；用户否掉了识别结果又没点名行业；或行业能识别但没有对应模版（这种情况在本框架之上把行业术语注入叙事即可）。
 
-## KPI System (generic measures computable from the data fields)
+## KPI 体系（可由数据字段直接算出的通用度量）
 
-| Metric family | Metrics | Definition notes |
+| 指标族 | 指标 | 定义说明 |
 |------|------|------|
-| Scale | Totals, record counts, mean/median | For monetary metrics, confirm unit and currency |
-| Trend | YoY, MoM, moving average | With less than one year of data, do MoM only; state the period baseline |
-| Composition | Share of total, Top-N concentration (CR5/CR10) | Merge the tail when there are more than 6 categories |
-| Dispersion | Standard deviation, IQR, coefficient of variation | Use the coefficient of variation when comparing across scales |
-| Association | Correlation matrix | Report strength only; phrasing follows statistical discipline |
+| 规模 | 总量、记录数、均值/中位数 | 金额类指标需确认单位与币种 |
+| 趋势 | 同比、环比、移动平均 | 数据不足一年时只做环比，并说明周期基准 |
+| 构成 | 占比、Top-N 集中度（CR5/CR10） | 类目超过 6 个时合并长尾 |
+| 离散 | 标准差、IQR、变异系数 | 跨量级比较时用变异系数 |
+| 关联 | 相关性矩阵 | 只报告强度；措辞遵循统计纪律 |
 
-## Typical Analysis Themes (select by the shape of the data)
+## 典型分析主题（按数据形态挑选）
 
-1. **Overall profile & trend**: how the core quantities move over time, and turning points
-2. **Structure & composition**: which categories/groups contribute the bulk of the total (Pareto view)
-3. **Dimensional comparison**: how key measures differ across dimensions (region, channel, grouping fields)
-4. **Distribution & anomalies**: distribution shapes, outliers, and candidate business interpretations
-5. **Association exploration**: correlation structure among numeric fields, suggesting directions for further analysis
+1. **整体画像与趋势**：核心量随时间怎么走，拐点在哪
+2. **结构与构成**：哪些类目/分组贡献了大头（帕累托视角）
+3. **维度对比**：关键度量在各维度（地区、渠道、分组字段）上的差异
+4. **分布与异常**：分布形态、离群点，以及可能的业务解释
+5. **关联探索**：数值字段之间的相关结构，为进一步分析指方向
 
-## Narrative Language
+## 叙事语言
 
-- Industry-neutral: use generic words such as "records, categories, measures, groups"; **never invent industry context**, and never use unconfirmed industry terminology
-- Quote field names exactly as they appear in the user's data; do not rewrite their semantics
-- Bind conclusions to the data range: "In the data from 2025-06 to 2026-05…"
+- 保持行业中立：用「记录、类目、度量、分组」这类通用词；**绝不编造行业背景**，也不使用未经确认的行业术语
+- 字段名照用户数据里的原样引用，不要改写其语义
+- 结论绑定数据范围：「在 2025-06 至 2026-05 的数据中……」
 
-## Report Section Emphasis
+## 报告分节侧重
 
-Organize the deep-dive analysis in the order "trend → structure → comparison → distribution/anomalies → association"; skip themes the data cannot support and say so in the data overview. No industry benchmark is citable here: do internal comparisons only (period-over-period, group-over-group).
+深入分析按「趋势 → 结构 → 对比 → 分布/异常 → 关联」的顺序组织；数据支撑不了的主题直接跳过，并在数据概况里说明。此处没有可引用的行业基准：只做内部对比（期间对比、分组对比）。

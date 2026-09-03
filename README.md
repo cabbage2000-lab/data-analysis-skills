@@ -137,6 +137,25 @@ DATA_ANALYSIS_WORKBUDDY_SKILL=/your/path/data-analysis-skills bash sync-to-user.
 >
 > **只想在单个项目里用？** 把用户级路径换成项目根目录下的项目级目录：Claude Code 用 `.claude/skills/`，Codex 用 `.codex/skills/`，**WorkBuddy 用 `.codebuddy/skills/`**——注意不是 `.workbuddy/`：它的用户级目录叫 `~/.workbuddy/`，项目级目录却沿用底层 CodeBuddy 内核的 `.codebuddy/`，这一处不对称写错了 skill 就一个都不出现。
 
+### 方式 D：SkillHub 社区源（不用 clone，一条命令装）
+
+[SkillHub](https://skillhub.cn) 是国内的 skill 社区，本 skill 已上架为 `@user_6733bad6/data-analysis-skills`。它的 CLI 有两个坑，**下面这条命令已经把两个都绕过了，照抄即可**：
+
+```bash
+# 装到 Claude Code；换成 ~/.codex/skills 或 ~/.workbuddy/skills 即装到另两个宿主
+skillhub install data-analysis-skills --namespace user_6733bad6 --dir ~/.claude/skills \
+  && mv ~/.claude/skills/@user_6733bad6/data-analysis-skills ~/.claude/skills/ \
+  && rmdir ~/.claude/skills/@user_6733bad6
+```
+
+> **`--namespace user_6733bad6` 一个字都不能省。** SkillHub 的 slug 只在各自命名空间内唯一，`data-analysis-skills` 这个名字在别人的命名空间下**也有一个同名 skill**。省掉 `--namespace`，CLI 会走「远程精确匹配」装到那一个上去——落盘目录名一模一样、没有任何报错，你要打开 `SKILL.md` 才会发现装的根本不是这个包。
+>
+> **后面两行 `mv` + `rmdir` 也不能省。** 带 `--namespace` 安装会多套一层 `@user_6733bad6/` 目录，而宿主只扫 `skills/*/SKILL.md` 这一层，多一层就**一个都发现不了且同样没有报错**。
+
+以后更新：重跑上面这条命令，`install` 那步加 `--force`（否则报 `Target exists`）。
+
+四种方式装的是同一套 skill，**只挑一种**——装多份会在触发时重复。
+
 ## 怎么用
 
 1. **给数据，说需求。** 在你的智能体里提供数据文件并表达分析诉求，例如：

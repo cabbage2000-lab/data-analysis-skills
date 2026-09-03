@@ -1,32 +1,32 @@
-# Internet / SaaS Analysis Template
+# 互联网 / SaaS 分析模版
 
-Scope: subscription software, internet products, membership services. Identification signals: fields or descriptions such as MRR, ARR, subscription, retention, DAU, trial, churn.
+适用范围：订阅制软件、互联网产品、会员制服务。识别信号：MRR、ARR、订阅、留存、DAU、试用、流失等字段或描述。
 
-## KPI System (KPI Dictionary & Definitions)
+## KPI 体系（KPI 词典与定义）
 
-| KPI | Definition | Points to confirm |
+| KPI | 定义 | 需确认的点 |
 |------|------|------|
-| MRR / ARR | End-of-period monthly recurring revenue; ARR = MRR × 12 | Whether one-off revenue is included (it should be excluded) |
-| Net New MRR | New + expansion − contraction − churned MRR | Whether all four components are present; if not, disclose using the available ones |
-| MRR churn rate | MRR churned in the month / MRR at month start | Distinguish revenue-based vs customer-count-based definitions |
-| Net dollar retention (NDR) | (MRR at month start + expansion − contraction − churn) / MRR at month start | >100% means net negative churn — call it out prominently |
-| Trial conversion rate | Conversions to paid / trials | Confirm the conversion window (14/30 days) |
-| LTV / CAC | LTV ≈ ARPA × gross margin / customer churn rate | Requires acquisition-cost data; if missing, report the LTV side only |
-| DAU/MAU stickiness | Daily actives / monthly actives | Confirm the definition of "active" |
-| Quick Ratio | (New + expansion) / (churn + contraction) | <2 growth under pressure; >4 healthy |
+| MRR / ARR | 期末月度经常性收入；ARR = MRR × 12 | 是否含一次性收入（应剔除） |
+| 净新增 MRR | 新增 + 扩展 − 收缩 − 流失 MRR | 四个分量是否齐全；不齐就用现有的并披露 |
+| MRR 流失率 | 当月流失 MRR / 月初 MRR | 区分「按收入」与「按客户数」两种口径 |
+| 净留存率（NDR） | （月初 MRR + 扩展 − 收缩 − 流失）/ 月初 MRR | >100% 即净负流失，要重点点出 |
+| 试用转化率 | 转付费数 / 试用数 | 确认转化窗口（14/30 天） |
+| LTV / CAC | LTV ≈ ARPA × 毛利率 / 客户流失率 | 需要获客成本数据；缺失就只报 LTV 侧 |
+| DAU/MAU 粘性 | 日活 / 月活 | 确认「活跃」的定义 |
+| Quick Ratio | （新增 + 扩展）/（流失 + 收缩） | <2 增长承压；>4 健康 |
 
-## Typical Analysis Themes
+## 典型分析主题
 
-1. **Growth engine decomposition**: evolution of the MRR waterfall (new/expansion/contraction/churn) over time; whether growth is driven by new customers or by expansion
-2. **Retention & churn (cohorts)**: retention curves or heatmaps by signup/first-purchase month; churn-rate trend and inflection-point detection
-3. **Funnel conversion**: stage-by-stage conversion trends from trial to paid; decompose changes in conversion rate vs changes in acquisition volume
-4. **Revenue quality**: NDR and Quick Ratio trends; MRR concentration (dependence on large accounts)
-5. **Engagement & usage**: DAU/MAU stickiness, feature-usage distribution (requires behavioral data)
+1. **增长引擎拆解**：MRR 瀑布（新增/扩展/收缩/流失）随时间的演化；增长究竟由新客驱动还是由存量扩展驱动
+2. **留存与流失（同期群）**：按注册月/首购月的留存曲线或热力图；流失率趋势与拐点识别
+3. **漏斗转化**：从试用到付费的分阶段转化趋势；把转化率变化与获客量变化拆开看
+4. **收入质量**：NDR 与 Quick Ratio 趋势；MRR 集中度（对大客户的依赖程度）
+5. **活跃与使用**：DAU/MAU 粘性、功能使用分布（需要行为数据）
 
-## Narrative Language
+## 叙事语言
 
-MRR, ARR, churn, NDR, cohort, funnel, ARPA, net negative churn, Rule of 40 (growth rate + profit margin). Quantify any slowdown statement: "average monthly MRR growth fell from 8% to 2% over the past 6 months". When churn rises, lead the warning with the revenue-based view (its direct impact on revenue).
+MRR、ARR、流失（churn）、NDR、同期群（cohort）、漏斗、ARPA、净负流失、Rule of 40（增长率 + 利润率）。说「变慢了」必须给量化：「近 6 个月 MRR 月均增速从 8% 降到 2%」。流失上升时，先用按收入口径示警（它直接冲击收入）。
 
-## Report Section Emphasis
+## 报告分节侧重
 
-Deep-dive priority: growth engine decomposition (always) → retention/churn (always) → funnel conversion → revenue quality. Go-to charts: MRR waterfall or stacked bars (component evolution), cohort heatmap (retention), funnel chart (conversion), dual-axis lines (growth rate vs churn rate). For founder/executive audiences: conclusions first, with the trend inflection as the #1 key finding.
+深入分析优先级：增长引擎拆解（必做）→ 留存/流失（必做）→ 漏斗转化 → 收入质量。常用图表：MRR 瀑布图或堆叠柱（分量演化）、同期群热力图（留存）、漏斗图（转化）、双轴折线（增速 vs 流失率）。面向创始人/高管：结论先行，把趋势拐点作为第一条核心发现。

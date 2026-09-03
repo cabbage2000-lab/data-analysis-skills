@@ -1,35 +1,35 @@
-# Corporate Finance / FP&A Analysis Template
+# 企业财务 / FP&A 分析模版
 
-Scope: corporate finance teams, FP&A, and business analysis examining the company's own financial data (P&L, expenses, budget, cash flow, receivables/payables). Identification signals: fields such as account/voucher (科目/凭证), budget/actual, revenue/cost/gross profit, selling/G&A/R&D expenses, cash flow, receivables/payables, cost center/business unit/profit center, or descriptions from finance leads/CFO/business analysts. Distinguish from "finance/quant investing" (returns, drawdown, positions, NAV) — that is an investor's view and this template does not apply; when hard to tell, confirm with the user.
+适用范围：企业财务部门、FP&A、经营分析岗看公司自身的财务数据（损益、费用、预算、现金流、应收应付）。识别信号：科目/凭证、预算/实际、收入/成本/毛利、销售/管理/研发费用、现金流、应收应付、成本中心/事业部/利润中心等字段，或来自财务负责人/CFO/经营分析岗的描述。要与「金融/量化投资」（收益率、回撤、持仓、净值）区分开——那是投资人视角，本模版不适用；不好判断时向用户确认。
 
-## KPI System (KPI Dictionary & Definitions)
+## KPI 体系（KPI 词典与定义）
 
-| KPI | Definition | Points to confirm |
+| KPI | 定义 | 需确认的点 |
 |------|------|------|
-| Revenue growth rate | (Current-period revenue − base-period revenue) / base-period revenue | Confirm YoY vs MoM/QoQ; for seasonal businesses prefer YoY |
-| Gross margin | (Revenue − COGS) / revenue | Whether cost includes manufacturing overhead / depreciation allocation; write the definition into the report |
-| Operating margin | (Revenue − cost − period expenses) / revenue | When data only reaches the expense level, use this definition and say so — never pass it off as net margin |
-| Expense ratio | A given period expense / revenue | Compute separately for the four classes: selling, G&A, R&D, finance |
-| Budget execution rate | Actual / budget | **Requires budget data**; for revenue items >100% means over-achievement, for cost/expense items >100% means overrun — never mix the directions |
-| Budget variance rate | (Actual − budget) / budget | **Requires budget data**; rank by both absolute variance and variance rate to locate the accounts that matter |
-| Operating cash flow / earnings quality | Net operating cash flow vs net profit | **Requires cash-flow data**; skip if missing |
-| DSO / DPO | Average receivables (payables) / revenue (cost) × days in period | **Requires receivables/payables balance data**; skip if missing |
-| EBITDA | Net profit + interest + income tax + depreciation & amortization | **Requires interest/tax/D&A fields**; skip if missing |
+| 收入增长率 | （本期收入 − 基期收入）/ 基期收入 | 确认是同比还是环比/季度环比；季节性业务优先同比 |
+| 毛利率 | （收入 − 营业成本）/ 收入 | 成本是否含制造费用/折旧分摊；把口径写进报告 |
+| 营业利润率 | （收入 − 成本 − 期间费用）/ 收入 | 数据只到费用层时用此定义并说明——绝不当作净利率来讲 |
+| 费用率 | 某项期间费用 / 收入 | 销售、管理、研发、财务四类分开算 |
+| 预算执行率 | 实际 / 预算 | **需要预算数据**；收入类 >100% 是超额完成，成本费用类 >100% 是超支——方向绝不能混 |
+| 预算偏差率 | （实际 − 预算）/ 预算 | **需要预算数据**；按绝对偏差额和偏差率双重排序，定位真正要紧的科目 |
+| 经营现金流 / 盈利质量 | 经营活动现金流净额 vs 净利润 | **需要现金流数据**；缺失则跳过 |
+| DSO / DPO | 平均应收（应付）/ 收入（成本）× 期间天数 | **需要应收应付余额数据**；缺失则跳过 |
+| EBITDA | 净利润 + 利息 + 所得税 + 折旧摊销 | **需要利息/税/折旧摊销字段**；缺失则跳过 |
 
-Metrics with missing fields: skip them and state in the report "the data does not include X, so Y was not computed" — never fabricate. P&L (accrual basis) and cash flow are two separate views: with P&L data alone, never infer "cash-flow position" or "collection status".
+字段缺失的指标：跳过，并在报告里写明「数据不含 X，因此未计算 Y」——绝不编造。损益（权责发生制）与现金流是两套视角：只有损益数据时，绝不推断「现金流状况」或「回款情况」。
 
-## Typical Analysis Themes
+## 典型分析主题
 
-1. **Profit structure & trend**: step-by-step decomposition from revenue → gross profit → operating profit (waterfall thinking); monthly/quarterly trends with YoY/MoM; seasonality detection (e.g. a Q4 surge), distinguishing "real business seasonality" from "budgeting that ignored seasonality" (when the budget is smooth but actuals have peaks, seasonally high attainment is a budgeting artifact, not a performance signal)
-2. **Expense structure & control**: composition and movement of each expense as a share of revenue; the gap between expense growth and revenue growth — expense growth persistently outpacing revenue growth is an early control warning
-3. **Budget execution & variance**: compute and rank execution/variance rates to locate overrun accounts; separate one-off variances from persistent ones (only multi-period same-direction overruns are structural — don't over-read single-period swings)
-4. **Cash flow & working capital** (requires cash-flow / receivables-payables data): divergence between operating cash flow and net profit (earnings quality); DSO/DPO trends and working-capital occupation
-5. **Department / product line / cost center profitability comparison**: side-by-side revenue scale, gross margin, and expense ratio across units; drill into units with deteriorating profitability — separate revenue-side (volume/price) from cost-side (cost-ratio) problems
+1. **利润结构与趋势**：从收入 → 毛利 → 营业利润的逐级拆解（瀑布思路）；月度/季度趋势配同比环比；季节性识别（如 Q4 冲高），并区分「真实的业务季节性」与「预算没考虑季节性」（预算按月摊平而实际有峰值时，旺季达成率高是预算编制的产物，不是业绩信号）
+2. **费用结构与管控**：各项费用占收入比的构成与变动；费用增速与收入增速的差额——费用增速持续跑赢收入增速是管控的早期预警
+3. **预算执行与偏差**：算出并排序执行率/偏差率以定位超支科目；把一次性偏差与持续性偏差分开（只有连续多期同向超支才是结构性的，单期波动不要过度解读）
+4. **现金流与营运资本**（需要现金流/应收应付数据）：经营现金流与净利润的背离（盈利质量）；DSO/DPO 趋势与营运资本占用
+5. **部门 / 产品线 / 成本中心盈利对比**：各单元的收入规模、毛利率、费用率并排看；对盈利恶化的单元下钻——把收入侧（量/价）问题与成本侧（成本率）问题拆开
 
-## Narrative Language
+## 叙事语言
 
-Account / line item (科目), YoY/MoM (同比/环比), attainment rate (达成率), execution rate (执行率), variance (偏差), control (管控), earnings quality (盈利质量), gross profit (毛利), period expenses (期间费用), P&L (损益). For executives (CFO/GM), conclusion-led with little jargon; for financial analysts, keep the definition details. Phrasing discipline: state facts rather than passing judgment — "selling expenses exceeded budget for three consecutive quarters, average variance +12%", not "selling expenses are out of control"; attribute cautiously — "Product line A's gross-margin decline coincided with a rising cost ratio", not "poor cost management eroded profit" (the data cannot see management actions).
+科目、同比/环比、达成率、执行率、偏差、管控、盈利质量、毛利、期间费用、损益。面向高管（CFO/总经理）结论先行、少术语；面向财务分析岗保留定义细节。措辞纪律：陈述事实而非下判断——说「销售费用连续三个季度超预算，平均偏差 +12%」，不说「销售费用失控」；归因要审慎——说「A 产品线毛利率下滑，同期成本率上升」，不说「成本管理不善侵蚀了利润」（数据看不见管理动作）。
 
-## Report Section Emphasis
+## 报告分节侧重
 
-Deep-dive priority: profit structure & trend (always) → expense structure (always) → budget execution variance (requires budget data) → department/product-line comparison → cash flow (requires data). Go-to charts: waterfall (revenue-to-profit decomposition; implement in ECharts 5.4.3 as stacked bars with a transparent base), grouped bars (budget vs actual), stacked bars/area (expense structure), multi-series lines (gross-margin trends across units).
+深入分析优先级：利润结构与趋势（必做）→ 费用结构（必做）→ 预算执行偏差（需要预算数据）→ 部门/产品线对比 → 现金流（需要数据）。常用图表：瀑布图（收入到利润的拆解；在 ECharts 5.4.3 里用带透明底座的堆叠柱实现）、分组柱（预算 vs 实际）、堆叠柱/面积图（费用结构）、多系列折线（各单元毛利率趋势）。

@@ -1,35 +1,35 @@
-# Machine Learning Modeling (insight-oriented)
+# 机器学习建模（面向洞察）
 
-Load for modeling and prediction tasks (classification/regression/clustering).
+用于建模与预测类任务（分类/回归/聚类）时加载。
 
-## Positioning: Insight over Accuracy
+## 定位：洞察优先于精度
 
-Modeling in this skill serves business understanding — "which factors matter and how they relate" beats "one more point of AUC". Default deliverable: model performance + feature-importance interpretation + business meaning. No hyperparameter fine-tuning unless the user explicitly asks for accuracy.
+本 skill 里的建模服务于业务理解——「哪些因素重要、它们之间是什么关系」比「AUC 再高一个点」更有价值。默认交付：模型表现 + 特征重要性解读 + 业务含义。除非用户明确要求精度，否则不做超参精调。
 
-## Hard Rules
+## 硬性规则
 
-1. **Always report evaluation metrics and the data split**: train/test ratio, stratified or not, split by time or not. Time-related data **must be split by time** (predicting the past from the future is leakage)
-2. **Leakage self-check**: do the features include "known only after the fact" fields (e.g. churn-month activity mixed in when predicting churn)? Remove on sight and record it
-3. **Class imbalance**: positives < 20% → don't use accuracy; report precision/recall/F1/AUC instead, and state which error type the business cares about more
-4. **Baseline comparison**: report the model's lift over a naive baseline (majority class / mean prediction), otherwise the metrics have no reference point
-5. **Model files are an optional deliverable**: save model files only when the user explicitly asks; by default deliver analysis conclusions only
+1. **必须报告评估指标和数据切分方式**：训练/测试比例、是否分层、是否按时间切分。与时间相关的数据**必须按时间切分**（用未来预测过去就是泄漏）
+2. **泄漏自检**：特征里是否混入了「事后才知道」的字段（例如预测流失时混进了流失当月的活跃度）？发现即剔除并记录
+3. **类别不平衡**：正类占比 < 20% 时不要用准确率；改报精确率/召回率/F1/AUC，并说明业务更在意哪一类错误
+4. **基线对比**：要报告模型相对朴素基线（多数类 / 均值预测）的提升，否则指标没有参照系
+5. **模型文件是可选交付物**：只在用户明确要求时保存模型文件；默认只交付分析结论
 
-## Task Quick Reference
+## 任务速查
 
-| Task | Default models | Reported metrics | Insight output |
+| 任务 | 默认模型 | 报告指标 | 洞察输出 |
 |------|------|------|------|
-| Binary classification (churn/conversion) | LogisticRegression + RandomForest, one each | AUC, precision/recall, confusion matrix | Coefficient signs + top-10 feature importance |
-| Regression (amount/quantity) | Ridge + GradientBoosting | RMSE, MAE, R² | Feature importance + partial-dependence description |
-| Clustering (segmentation) | KMeans (standardize first) | Silhouette score to pick k (try 2–8) | Per-cluster profile table (feature means + a name) |
+| 二分类（流失/转化） | LogisticRegression + RandomForest 各一个 | AUC、精确率/召回率、混淆矩阵 | 系数符号 + Top-10 特征重要性 |
+| 回归（金额/数量） | Ridge + GradientBoosting | RMSE、MAE、R² | 特征重要性 + 部分依赖描述 |
+| 聚类（分群） | KMeans（先标准化） | 用轮廓系数选 k（试 2–8） | 各簇画像表（特征均值 + 起个名字） |
 
-Cluster segmentation must deliver "cluster profiles + business names" (e.g. "high-frequency, low-spend"); bare cluster 0/1/2 labels are not acceptable.
+聚类分群必须交付「簇画像 + 业务命名」（例如「高频低客单」）；只给 cluster 0/1/2 这种裸标签不合格。
 
-## Feature-Importance Interpretation Discipline
+## 特征重要性的解读纪律
 
-- Importance ≠ causality: phrase as "the features contributing most to the model's discrimination", never "X causes Y" (causal conclusions needed → causal-inference.md)
-- High-cardinality ID fields (user ID, order number) never enter the features
-- Correlated features split importance between them; interpret by business groups
+- 重要性 ≠ 因果：措辞用「对模型判别贡献最大的特征」，绝不说「X 导致 Y」（要因果结论 → 转 causal-inference.md）
+- 高基数 ID 类字段（用户 ID、订单号）绝不进入特征
+- 相关的特征会互相摊薄重要性；按业务分组来解读
 
-## Dependency Degradation
+## 依赖降级
 
-scikit-learn missing and install fails: skip the modeling task; answer "which factors are related" with grouped statistics + correlation analysis instead, and state why no model was built.
+scikit-learn 缺失且安装失败：跳过建模任务；改用分组统计 + 相关性分析来回答「哪些因素相关」，并说明为什么没有建模。

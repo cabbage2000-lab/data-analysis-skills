@@ -1,101 +1,101 @@
-# Visualization & Report Generation Rules
+# 可视化与报告生成规则
 
-Load during Phases 4–5 whenever charts are produced; required reading before generating the report in Phase 5.
+阶段 4–5 只要出图就加载；阶段 5 生成报告前必读。
 
-## Before charting: is it even a chart?
+## 出图之前：这真的需要一张图吗？
 
-Some "charts" are really a single number or a short list — charting them adds ink, not information. Check this before picking a chart type:
+有些「图表」本质上只是一个数字或一小串数字——给它画图只增加墨水，不增加信息。选图表类型之前先过一遍这张表：
 
-| The data is… | Deliver as | Never as |
+| 数据本身是…… | 应该交付为 | 绝不要做成 |
 |------|------|------|
-| One headline value (+ an optional trend remark) | a `stats` tile in Data Overview, or a **bolded number** in the section narrative | a one-bar bar chart |
-| A handful of headline numbers | the `stats` tile row (label / value / note) | a grouped bar of 3 lonely values |
-| A single ratio against a target or limit | a narrative sentence with both numbers bolded | a 2-slice pie |
-| More than ~7 categories that all carry meaning | a table (the `tables` contract), optionally table + a chart of the TOP few | one chart cycling past 8 colors |
+| 一个头条数值（可带一句趋势备注） | 数据概况里的 `stats` 磁贴，或章节叙事里的**加粗数字** | 只有一根柱子的柱状图 |
+| 几个头条数字 | `stats` 磁贴行（label / value / note） | 三个孤零零数值的分组柱 |
+| 一个比率对照目标或上限 | 一句叙事，两个数字都加粗 | 两片的饼图 |
+| 超过约 7 个都有意义的类目 | 表格（`tables` 契约），可选「表格 + TOP 几名的图」 | 一张色板循环过 8 色的图 |
 
-## Chart Selection: pick by question, don't pile on charts
+## 图表选型：按问题选，不要堆图
 
-Every chart must answer one explicit question. Write the question first, then pick the chart type:
+每张图必须回答一个明确的问题。先把问题写出来，再选图表类型：
 
-| Question to answer | Preferred chart | ECharts notes |
+| 要回答的问题 | 首选图表 | ECharts 注意事项 |
 |------|------|------|
-| How does it change over time? | Line | Add `dataZoom` on the time axis; more than 4 series → small multiples or curate down |
-| Who is bigger/smaller (category comparison)? | Bar (horizontal for long labels) | Sort by value, not alphabetically |
-| Composition / share? | Pie (≤6 categories) / stacked bar (composition over time) | Merge categories beyond 6 into "Other" |
-| Relationship between two variables? | Scatter | A trend reference line must be precomputed in Python as an extra series |
-| Distribution shape? | Histogram (bar-based) / box plot (between-group comparison) | Box plot series type `boxplot`; precompute the five-number summary in Python |
-| Where is the concentration/anomaly (two-way cross)? | Heatmap | Good for hour × weekday, category × region |
-| Flows / conversion? | Sankey / funnel | Funnel for a single conversion path, Sankey for multi-branch flows |
-| Cumulative contribution (80/20)? | Pareto (bar + line, dual axis) | Common for retail category and customer-contribution analysis; the **sanctioned dual-axis exception** — the line axis is a fixed 0–100% cumulative share, see anti-patterns |
-| Retention decay over time? | Cohort heatmap | Common in SaaS/internet: rows = cohorts, columns = periods |
+| 随时间如何变化？ | 折线图 | 时间轴加 `dataZoom`；超过 4 条系列就改小倍数或精简 |
+| 谁大谁小（类目对比）？ | 柱状图（标签长时用横向条形） | 按数值排序，不要按字母序 |
+| 构成 / 占比？ | 饼图（≤6 类）/ 堆叠柱（构成随时间变化） | 超过 6 类的合并为「其他」 |
+| 两个变量之间的关系？ | 散点图 | 趋势参考线必须在 Python 侧预先算好，作为额外系列注入 |
+| 分布形态？ | 直方图（用柱状实现）/ 箱线图（组间对比） | 箱线图 series 类型为 `boxplot`；五数概括在 Python 侧预先算好 |
+| 集中/异常出现在哪（双向交叉）？ | 热力图 | 适合小时 × 星期、类目 × 地区 |
+| 流转 / 转化？ | 桑基图 / 漏斗图 | 单一转化路径用漏斗，多分支流转用桑基 |
+| 累计贡献（80/20）？ | 帕累托图（柱 + 线，双轴） | 零售品类与客户贡献分析常用；这是**被豁免的双轴场景**——折线轴是固定的 0–100% 累计占比，见反模式清单 |
+| 留存随时间衰减？ | 同期群热力图 | SaaS/互联网常用：行 = 同期群，列 = 期数 |
 
-Prefer industry-customary charts: drawdown curves (line + area fill) in finance, Pareto in retail, cohort heatmaps in SaaS. If the industry template's "report section emphasis" specifies chart types, follow it.
+优先采用行业惯用图表：金融看回撤曲线（折线 + 面积填充），零售看帕累托，SaaS 看同期群热力图。行业模版的「报告分节侧重」里指定了图表类型的，照它执行。
 
-## Emphasis: when one series is the story
+## Emphasis：当叙事只关于一条系列时
 
-When the narrative is about ONE series ("digital appliances broke out", "this store vs the market average"), don't hand every series a palette color — that buries the point. Highlight the protagonist, mute the rest:
+叙事聚焦于**某一条**系列时（「数码家电爆发」「本店 vs 大盘均值」），不要给每条系列都上色板色——那会把重点埋掉。把主角高亮，其余压暗：
 
-- Protagonist series: leave it on the palette (slot 1 blue), or the semantic red/blue when the story itself is down/up
-- Every background series: de-emphasis gray — `"itemStyle": {"color": "#b5b5b5"}` (visible but receding)
-- Direct-label the protagonist only (`endLabel` or a last-point `label`); background series stay unlabeled — the tooltip still carries them
-- The chart's `insight` names the protagonist, so chart and narrative point at the same thing
+- 主角系列：保留色板色（slot 1 蓝），或在故事本身就是涨/跌时用语义红/蓝
+- 所有背景系列：统一用 de-emphasis 灰——`"itemStyle": {"color": "#b5b5b5"}`（看得见但退后）
+- 只给主角做直接标注（`endLabel` 或末点 `label`）；背景系列不标注——tooltip 里仍然有它们
+- 该图的 `insight` 要点名主角，让图和叙事指向同一件事
 
-## Chart Anti-patterns — check every chart against this before shipping
+## 图表反模式——每张图出手前对照检查
 
-If a produced chart matches a row, fix it before it ships:
+产出的图命中下表任何一行，就先修再发：
 
-| ❌ Anti-pattern | Why it misleads | ✅ Do instead |
+| ❌ 反模式 | 为什么会误导 | ✅ 改成 |
 |------|------|------|
-| Dual y-axes: two different measures, two scales on one plot | the two scales' relative alignment is arbitrary — the chart manufactures a correlation the data doesn't claim | two charts stacked, or index both series to a common base (=100 at t0) on **one** axis. **Sanctioned exception: Pareto** — its second axis is a fixed 0–100% cumulative-share scale, not an arbitrary one; keep that exception, and only that one |
-| Recoloring after a filter/sort: series colors assigned by current rank | a reader who learned "华东 is blue" in chart 1 is misled by chart 3 | color follows the entity — the same entity keeps the same series position/color across every chart in the report |
-| Rainbow / multi-hue ramp for magnitude — **ECharts `visualMap` defaults to one** | hue order is not perceptual order; magnitude needs light→dark | one hue, light→dark. The template injects a blue ramp when `visualMap.inRange` is unset — do not set a multi-hue ramp yourself |
-| Categorical palette on ordered categories (funnel stages, age bands, rating tiers) | ordered things shown as unrelated identities — the order disappears | a one-hue ramp, light→dark in category order (set per-item `itemStyle.color` from the template's blue ramp) |
-| Pie for near-equal values, or >6 slices | readers can't compare angles precisely | a sorted horizontal bar, or just the numbers; pie only for at-a-glance part-to-whole with ≤6 slices |
-| Semantic colors astray: a neutral series wearing red while the chart also talks profit/loss or target/overrun | readers assign good/bad meaning the data doesn't carry | when a chart carries up/down semantics, reserve red `#e3120b` for negative and blue `#006ba6` for positive; reorder or explicitly recolor neutral series away from red |
+| 双 Y 轴：两个不同度量、两套刻度画在一张图上 | 两套刻度的相对对齐是任意的——这张图制造了一个数据本身并未主张的相关性 | 拆成上下两张图，或把两条系列归一化到共同基准（t0 = 100）画在**同一根**轴上。**唯一豁免：帕累托图**——它的第二根轴是固定的 0–100% 累计占比，不是任意刻度；保留这一个豁免，且仅此一个 |
+| 筛选/排序后重新配色：系列颜色按当前排名分配 | 在图 1 里学会「华东是蓝色」的读者，到图 3 就被误导了 | 颜色跟实体走——同一个实体在报告的每张图里保持同一个系列位置/颜色 |
+| 用彩虹/多色相渐变表达数值大小——**ECharts `visualMap` 默认就是这样** | 色相顺序不是感知顺序；数值大小需要「浅→深」 | 单一色相，浅→深。`visualMap.inRange` 未设置时模板会注入蓝色渐变——不要自己设多色相渐变 |
+| 给有序类目（漏斗阶段、年龄段、评级档）用分类色板 | 有序的东西被画成互不相关的身份——顺序消失了 | 用单色相渐变，按类目顺序浅→深（从模板的蓝色渐变里取值，逐项设 `itemStyle.color`） |
+| 数值相近还用饼图，或切成 >6 片 | 读者无法精确比较角度 | 改成排序后的横向条形，或干脆只给数字；饼图只用于「一眼看部分与整体」且 ≤6 片 |
+| 语义色跑偏：图里同时在讲盈亏或达成/超支，却让一条中性系列穿了红色 | 读者会赋予数据本身并不携带的好/坏含义 | 图带涨跌语义时，红色 `#e3120b` 只留给负向、蓝色 `#006ba6` 只留给正向；把中性系列调序或显式改色，避开红色 |
 
-## ECharts option Generation Rules (Python side)
+## ECharts option 生成规则（Python 侧）
 
-Build options directly as dicts and inject via `json.dumps` — **do not use pyecharts**. Constraints and defaults:
+直接构造 dict 再用 `json.dumps` 注入——**不要用 pyecharts**。约束与默认值：
 
-1. **Pure JSON**: options must not contain functions. Use ECharts string templates for tooltip/label formatters (`'{b}: {c}'`, `'{b}<br/>{a}: {c} ({d}%)'`)
-2. **Default interaction for time series**: `"dataZoom": [{"type": "inside"}, {"type": "slider"}]`
-3. **Toolbox on every chart**: `"toolbox": {"feature": {"saveAsImage": {}, "dataView": {"readOnly": true}}}`
-4. **Tooltip on by default**: `{"trigger": "axis"}` for line/bar, `{"trigger": "item"}` for scatter/pie
-5. **Value-axis names carry the unit**: `"yAxis": {"type": "value", "name": "Sales (10k CNY)"}`; when amounts run large, convert the unit in Python before injecting
-6. Palette, fonts and mark specs are covered by the report template's defaults (colorblind-validated series palette; 2px lines, 8px markers with a surface ring, 24px bar-width cap, 2px surface gaps between stacked segments / pie slices, 12% area-fill opacity, auto-hidden symbols past 50 points); options need not set color or mark styling (except special semantic colors — e.g. a red-for-down / green-for-up convention must be set explicitly)
-7. **Series-count ladder**: 1–3 series read comfortably; 5–6 is the soft cap. Past 6, fold the tail into "Other", split into small multiples (several chart entries), or rethink the chart — **never let the palette cycle past its 8 slots**: a 9th series silently reuses slot 1's color and becomes indistinguishable from it
-8. **Label selectively — never a number on every point**: flood-labeling (`label: {show: true}` on a whole series) goes unread and turns the chart into noise. Direct-label only what the narrative is about — the endpoint (`endLabel`), the extreme, the one highlighted series — and let axis ticks + tooltip carry the rest
-9. **Legend follows series count**: a single-series chart sets `"legend": {"show": false}` — the chart title already names the series, a one-swatch legend box restates it. With ≥2 series the legend must stay visible (readers must never have to rely on color memory alone)
+1. **纯 JSON**：option 里不得包含函数。tooltip/label 的 formatter 用 ECharts 字符串模板（`'{b}: {c}'`、`'{b}<br/>{a}: {c} ({d}%)'`）
+2. **时间序列默认交互**：`"dataZoom": [{"type": "inside"}, {"type": "slider"}]`
+3. **每张图都带 toolbox**：`"toolbox": {"feature": {"saveAsImage": {}, "dataView": {"readOnly": true}}}`
+4. **tooltip 默认开启**：折线/柱状用 `{"trigger": "axis"}`，散点/饼图用 `{"trigger": "item"}`
+5. **数值轴名称带单位**：`"yAxis": {"type": "value", "name": "销售额（万元）"}`；金额量级大时先在 Python 侧换算单位再注入
+6. 色板、字体与标记规格由报告模板的默认值覆盖（经色盲校验的系列色板；2px 线宽、8px 标记点带纸面白环、柱宽上限 24px、堆叠段/饼段之间 2px 白缝、面积填充 12% 透明度、超过 50 点自动隐藏点标记）；option 无需设置颜色或标记样式（特殊语义色除外——例如「跌红涨绿」这类约定必须显式设置）
+7. **系列数阶梯**：1–3 条读起来最舒服；5–6 条是软上限。超过 6 条就把长尾折叠为「其他」、拆成小倍数（多个图表条目），或者重新想选型——**绝不让色板循环过它的 8 个槽位**：第 9 条系列会静默复用 slot 1 的颜色，变得与它无法区分
+8. **有选择地标注——绝不给每个点都标数字**：整条系列刷标注（`label: {show: true}`）没人会读，只会把图变成噪声。只给叙事真正关心的东西做直接标注——端点（`endLabel`）、极值、被高亮的那条系列——其余交给坐标轴刻度和 tooltip
+9. **图例跟随系列数**：单系列图设 `"legend": {"show": false}`——图表标题已经点明了这条系列，一个色块的图例只是重复。≥2 条系列时图例必须保留（绝不能让读者只靠颜色记忆）
 
-## Data Volume Control (mandatory)
+## 数据量控制（强制）
 
-What gets injected into the HTML is **chart-ready data**, not raw detail:
+注入 HTML 的是**给图表用的数据**，不是原始明细：
 
-- A single series over ~1000 points: aggregate first (coarsen granularity: day → week → month) or sample, and record the aggregation granularity in the appendix "Data Processing Notes"
-- Scatter over ~2000 points: random-sample and note the sampling ratio
-- Tables: detail-level rows are allowed (e.g. SKU-level, per-day records). Hard cap **500 rows per table**: beyond that, truncate to TOP-N in Python before injection (ranked by the measure under analysis) and record the truncation in appendix `processing_notes`. The template never truncates silently
-- Goal: keep the single-file HTML small and smooth to open
+- 单条系列超过约 1000 个点：先聚合（粗化粒度：日 → 周 → 月）或采样，并把聚合粒度记入附录「数据处理说明」
+- 散点超过约 2000 个点：随机采样并注明采样比例
+- 表格：允许明细级行（如 SKU 级、逐日记录）。硬上限**每张表 500 行**：超出时在 Python 侧先截断为 TOP-N 再注入（按所分析的度量排序），并把截断记入附录 `processing_notes`。模板从不静默截断
+- 目标：让单文件 HTML 保持小体积、打开流畅
 
-## Table Modes (static vs interactive)
+## 表格模式（静态 vs 交互）
 
-The template picks the table mode automatically by row count — control it only through how many rows you inject:
+模板按行数自动选择表格模式——你只通过「注入多少行」来控制它：
 
-- **≤20 rows**: static publication-style table (the default look, consistent with the report's design system)
-- **>20 rows**: automatic interactive table (Grid.js — pagination/search/sort). Same `tables` structure; never add fields or markers to opt in/out
-- Keep `rows` as display-formatted strings (`"¥1,200,000"`, `"12.4%"`). The template parses numbers for column sorting — do not inject raw unformatted numbers just to make sorting work
-- Detail tables: cap 500 rows; truncate to TOP-N before injection and add a `processing_notes` entry (see Data Volume Control)
-- Print/PDF caveat: an interactive table prints only the currently visible page (other rows are not in the DOM). If the user explicitly asks for a print/PDF deliverable, prefer ≤20-row summary tables, or note the cutoff in the narrative
+- **≤20 行**：静态出版风表格（默认外观，与报告的设计系统一致）
+- **>20 行**：自动切换为交互表格（Grid.js——分页/搜索/排序）。`tables` 结构不变；绝不为了切换模式而增加字段或标记
+- `rows` 保持为已格式化的展示字符串（`"¥1,200,000"`、`"12.4%"`）。模板会解析数字以支持列排序——不要为了让排序生效就注入未格式化的裸数字
+- 明细表：上限 500 行；注入前截断为 TOP-N 并补一条 `processing_notes`（见数据量控制）
+- 打印/PDF 注意：交互表格只会打印出当前可见的那一页（其余行不在 DOM 里）。用户明确要打印/PDF 交付物时，优先用 ≤20 行的汇总表，或在叙事里说明这个截断
 
-## Report Generation Flow (Phase 5)
+## 报告生成流程（阶段 5）
 
-1. Read `assets/report_template.html` (data contract in the template's header comment)
-2. Assemble the report_data dict in Python: six-section content + per-chart `{id, title, question, option, insight}`
-3. The `insight` field is required: answer "what this shows and what it means for the decision", in the industry's narrative language
-4. `template.replace('__REPORT_DATA_JSON__', json.dumps(report_data, ensure_ascii=False))` to write the single-file HTML
-5. Self-check: placeholder replaced, `json.dumps` succeeded (numpy types inside options make it fail — convert to native `int/float/list` first; use `default=str` to track down offenders)
+1. 读取 `assets/report_template.html`（数据契约见模板头部注释）
+2. 在 Python 里组装 report_data dict：六段式内容 + 每张图的 `{id, title, question, option, insight}`
+3. `insight` 字段必填：回答「这张图说明了什么、对决策意味着什么」，用该行业的叙事语言
+4. 用 `template.replace('__REPORT_DATA_JSON__', json.dumps(report_data, ensure_ascii=False))` 写出单文件 HTML
+5. 自检：占位符已被替换、`json.dumps` 成功（option 里混入 numpy 类型会失败——先转成原生 `int/float/list`；用 `default=str` 可以定位是谁）
 
 ```python
-# numpy → native conversion (always run before json.dumps)
+# numpy → 原生类型转换（json.dumps 之前必跑）
 def to_native(o):
     import numpy as np
     if isinstance(o, dict):  return {k: to_native(v) for k, v in o.items()}
@@ -104,31 +104,31 @@ def to_native(o):
     return o
 ```
 
-## Narrative Typography (Phase 5)
+## 叙事排版（阶段 5）
 
-The template renders narrative text with two Markdown tiers (authoritative contract in the template's header comment):
+模板用两档 Markdown 渲染叙事文本（权威契约见模板头部注释）：
 
-| Fields | Supported syntax |
+| 字段 | 支持的语法 |
 |------|------|
-| The four `narrative` fields (`background` / `data_overview` / `sections[]` / `conclusions`) | Block-level: blank line = paragraph break, `### ` subheading, `- ` unordered list, `1. ` ordered list, `**bold**` |
-| All other text fields (`headline`/`detail`/`objectives`/`insight`/`quality_summary`/`recommendations`/notes) | `**bold**` and line breaks only |
+| 四个 `narrative` 字段（`background` / `data_overview` / `sections[]` / `conclusions`） | 块级：空行 = 分段、`### ` 小标题、`- ` 无序列表、`1. ` 有序列表、`**加粗**` |
+| 其余所有文本字段（`headline`/`detail`/`objectives`/`insight`/`quality_summary`/`recommendations`/notes） | 只支持 `**加粗**` 和换行 |
 
-Discipline — these exist so reports read like editorial writing, not slide bullets:
+纪律——这些规则的存在是为了让报告读起来像社论写作，而不是幻灯片要点：
 
-- **Narrative first, lists second**: prose carries the argument; use a list only for 3+ parallel points. Never convert an entire narrative into bullets
-- Paragraphs of 2–4 sentences, separated by blank lines; at most one `### ` block per section narrative (chapter structure belongs in `sections[]`, not inside a narrative)
-- No Markdown tables/links/images/code — tabular data goes in the `tables` field
-- `**bold**` renders in the accent red: reserve it for key numbers and decision-bearing phrases, not whole sentences
-- Ordered items must start the line as `1. ` (Chinese `1、` also works); a 4-digit year like `2025.` is not parsed as a list
+- **叙事优先、列表其次**：论证由散文承载；只有 3 条以上并列要点才用列表。绝不把整段叙事改写成 bullet
+- 每段 2–4 句，段间空行分隔；每节叙事最多一个 `### ` 块（章节结构属于 `sections[]`，不属于叙事内部）
+- 不使用 Markdown 表格/链接/图片/代码——表格数据放 `tables` 字段
+- `**加粗**` 会渲染成强调红：只留给关键数字和承载决策的短语，不要整句加粗
+- 有序项必须以 `1. ` 开头（中文 `1、` 也可以）；像 `2025.` 这样的四位年份不会被解析成列表
 
-## Matplotlib / Seaborn (in-process exploration only, or when the user explicitly asks for static charts)
+## Matplotlib / Seaborn（仅用于分析过程中的探查，或用户明确要求静态图时）
 
-Chinese text output requires explicit font configuration, otherwise glyphs render garbled:
+输出中文必须显式配置字体，否则会渲染成乱码方块：
 
 ```python
 import matplotlib
 matplotlib.rcParams['font.sans-serif'] = ['PingFang SC', 'Hiragino Sans GB', 'Noto Sans CJK SC', 'SimHei', 'Microsoft YaHei']
-matplotlib.rcParams['axes.unicode_minus'] = False  # render minus signs correctly
+matplotlib.rcParams['axes.unicode_minus'] = False  # 正确渲染负号
 ```
 
-Exploration charts never go into the report; Matplotlib output becomes a formal deliverable only when the user asks for PDF/static delivery.
+探查用的图绝不进报告；只有用户要求 PDF/静态交付时，Matplotlib 的输出才成为正式交付物。
